@@ -47,6 +47,7 @@ ai-pattern-scan = "ai_dev_tools.cli.pattern_scan:main"
 ai-safety-check = "ai_dev_tools.cli.safety_check:main"
 ai-repo-status = "ai_dev_tools.cli.repo_status:main"
 ai-context = "ai_dev_tools.cli.context_analyze:main"
+ai-diff = "ai_dev_tools.cli.difference_analyze:main"
 ai-workflow = "ai_dev_tools.cli.ai_workflow:cli"
 
 [project.urls]

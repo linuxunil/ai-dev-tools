@@ -99,4 +99,65 @@
 **Phase 4: Extended Tools** - Recreate original tools functionality in project-generic manner
 
 ### Current Release
-**v0.3.0-alpha** - Complete AI Agent interface with comprehensive testing and validation
+**v0.5.0-alpha** - Context analyzer complete, ready for ai-diff implementation
+
+## Workflow & Requirements Documentation
+
+### **Established Development Workflow**
+1. **Feature Branch Pattern**: Always create `feature/tool-name` branches for new tools
+2. **Professional Git Workflow**: 
+   - Atomic commits with descriptive messages
+   - Pre-commit hooks for quality (ruff, mypy)
+   - GitHub Actions CI/CD pipeline
+   - Proper semantic versioning with git tags
+3. **BDD Red-Green-Refactor**: Write failing tests first, implement to pass, refactor
+4. **AI-Maintainable Design**: Simple, focused, well-documented code that AI can easily understand and modify
+
+### **Core Design Principles**
+1. **Exit-Code-First Architecture**: Tools communicate via exit codes (0-254 for data, 255 for errors)
+2. **Silent by Default**: No output unless `--format` flag explicitly requests it
+3. **Project-Generic Approach**: Tools work across languages/frameworks, not just Nix
+4. **Token Efficiency**: Designed for AI agent consumption with minimal token usage
+5. **Safety-First**: Always assess risk before making changes
+
+### **Tool Implementation Pattern**
+**Every new tool follows this exact structure:**
+1. **Core Module**: `src/ai_dev_tools/core/tool_name.py` with main logic class
+2. **CLI Interface**: `src/ai_dev_tools/cli/tool_name.py` with click command
+3. **Entry Point**: Add command to `pyproject.toml` console_scripts
+4. **Comprehensive Tests**: Both unit tests and BDD feature tests
+5. **Exit Code Design**: Meaningful exit codes that encode information for AI consumption
+
+### **Testing Requirements**
+- **Unit Tests**: `tests/test_tool_name_basic.py` for core functionality
+- **BDD Tests**: `tests/features/tool_name.feature` for behavior scenarios
+- **Exit Code Validation**: Every tool must have deterministic, testable exit codes
+- **Coverage**: Aim for comprehensive test coverage of all code paths
+- **Integration**: Test CLI commands and core classes separately
+
+### **Quality Standards**
+- **Type Safety**: Full type hints required (`mypy --strict`)
+- **Code Quality**: Ruff formatting and linting (line length 88)
+- **Documentation**: Google-style docstrings with Args/Returns
+- **Error Handling**: Specific exceptions, graceful failures
+- **Security**: No secrets in code, safe file operations
+
+### **AI Agent Integration**
+- **High-Level API**: `src/ai_dev_tools/agents/ai_agent.py` provides workflow methods
+- **Systematic Fixes**: `fix_and_propagate_workflow` for applying changes across codebase
+- **Context Awareness**: Tools provide repository health and complexity metrics
+- **Batch Operations**: Support for processing multiple files/patterns efficiently
+
+### **Session Continuity Requirements**
+**For future AI sessions, always:**
+1. **Check Current Status**: Read `AGENTS.md` and run `git status` to understand state
+2. **Follow Established Patterns**: Use existing tool structure and workflow
+3. **Maintain Quality**: Run linting/testing before commits
+4. **Update Documentation**: Keep `AGENTS.md` current with progress
+5. **Professional Git**: Feature branches, atomic commits, proper tags
+
+### **Key Success Factors**
+- **Consistency**: Every tool follows the same patterns and quality standards
+- **AI-Friendly**: Code is simple, well-documented, and easily maintainable by AI
+- **Professional**: Git workflow, CI/CD, testing, and documentation meet industry standards
+- **Focused**: Each tool has a single, clear responsibility with meaningful exit codes
