@@ -50,6 +50,7 @@ ai-context = "ai_dev_tools.cli.context_analyze:main"
 ai-diff = "ai_dev_tools.cli.difference_analyze:main"
 ai-impact = "ai_dev_tools.cli.impact_analyze:main"
 ai-workflow = "ai_dev_tools.cli.ai_workflow:cli"
+ai-validate = "ai_dev_tools.cli.ai_validate:validate"
 
 [project.urls]
 Homepage = "https://github.com/ai-dev-tools/ai-dev-tools"
