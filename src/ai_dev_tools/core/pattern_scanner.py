@@ -297,14 +297,70 @@ class PatternScanner:
         self,
         target_pattern: Dict[str, Any],
         line: str,
-        all_lines: List[str],
-        line_idx: int,
+        context_lines: List[str],
+        line_num: int,
     ) -> float:
-        """Calculate similarity between target pattern and current line"""
-        # Pattern type must match
-        current_pattern_type = self._detect_pattern_type(line, all_lines, line_idx)
-        if current_pattern_type != PatternType(target_pattern["pattern_type"]):
+        """
+        Calculate similarity between target pattern and a candidate line
+
+        Args:
+            target_pattern: The target pattern to match against
+            line: Candidate line content
+            context_lines: All lines in the file for context
+            line_num: Line number of the candidate
+
+        Returns:
+            Similarity score (0.0 to 1.0)
+        """
+        if not line.strip():
             return 0.0
+
+        target_content = target_pattern["content"]
+
+        # Exact match gets highest score
+        if line == target_content:
+            return 1.0
+
+        # Pattern type specific matching
+        pattern_type = target_pattern["pattern_type"]
+
+        if pattern_type == PatternType.MKIF_HOME_PACKAGES:
+            if "mkIf" in line and "home.packages" in line:
+                return 0.9
+        elif pattern_type == PatternType.MKIF_LIST_CONCAT:
+            if "mkIf" in line and "++" in line:
+                return 0.9
+        elif pattern_type == PatternType.HOMEBREW_LIST:
+            if "homebrew" in line.lower():
+                return 0.8
+        elif pattern_type == PatternType.HOME_FILE_CONFIG:
+            if "home.file" in line:
+                return 0.8
+        elif pattern_type == PatternType.SHELL_SCRIPT_BIN:
+            if "writeShellScriptBin" in line:
+                return 0.9
+
+        # Structural similarity for generic patterns
+        target_tokens = self._tokenize_line(target_content)
+        candidate_tokens = self._tokenize_line(line)
+
+        if not target_tokens or not candidate_tokens:
+            return 0.0
+
+        # Calculate token overlap
+        common_tokens = set(target_tokens) & set(candidate_tokens)
+        total_tokens = set(target_tokens) | set(candidate_tokens)
+
+        if not total_tokens:
+            return 0.0
+
+        token_similarity = len(common_tokens) / len(total_tokens)
+
+        # Boost score if structure is similar
+        if self._has_similar_structure(target_content, line):
+            token_similarity *= 1.2
+
+        return min(token_similarity, 1.0)
 
         # Use specialized matching for known patterns
         pattern_type = PatternType(target_pattern["pattern_type"])
