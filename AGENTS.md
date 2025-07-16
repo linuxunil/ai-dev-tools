@@ -99,7 +99,7 @@
 **Phase 4: Extended Tools** - AI Helper Integration and performance optimization
 
 ### Current Release
-**v0.8.0-alpha** - AI-Validate tool complete, comprehensive project validation ready
+**v0.9.0** - AI Helper Integration complete, unified AI assistant with tool orchestration ready
 
 ## Workflow & Requirements Documentation
 

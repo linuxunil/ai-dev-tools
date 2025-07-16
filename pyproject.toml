@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "ai-dev-tools"
-version = "0.8.0"
+version = "0.9.0"
 description = "AI-optimized development tools for efficient code analysis and pattern detection"
 authors = [
     {name = "AI Development Tools", email = "dev@ai-tools.local"}
