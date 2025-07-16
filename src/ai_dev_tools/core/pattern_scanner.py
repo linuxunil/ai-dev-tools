@@ -410,6 +410,38 @@ class PatternScanner:
 
         return len(intersection) / len(union) if union else 0.0
 
+    def _tokenize_line(self, line: str) -> List[str]:
+        """Tokenize a line into meaningful tokens"""
+        import re
+
+        # Split on whitespace and common delimiters, filter empty strings
+        tokens = re.split(r"[\s\[\]{}(),;=]+", line.strip())
+        return [token for token in tokens if token]
+
+    def _has_similar_structure(self, line1: str, line2: str) -> bool:
+        """Check if two lines have similar structural patterns"""
+
+        # Remove content but keep structure indicators
+        def get_structure(line):
+            import re
+
+            # Replace strings and numbers with placeholders
+            line = re.sub(r'"[^"]*"', '"STR"', line)
+            line = re.sub(r"'[^']*'", "'STR'", line)
+            line = re.sub(r"\b\d+\b", "NUM", line)
+            line = re.sub(r"\b[a-zA-Z_][a-zA-Z0-9_]*\b", "ID", line)
+            return line
+
+        struct1 = get_structure(line1)
+        struct2 = get_structure(line2)
+
+        # Check if structures are similar (allowing some variation)
+        return (
+            struct1 == struct2
+            or len(set(struct1) & set(struct2)) / max(len(struct1), len(struct2), 1)
+            > 0.7
+        )
+
 
 def scan_patterns_with_exit_code(
     target_file: str,

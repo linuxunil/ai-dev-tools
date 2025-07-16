@@ -93,43 +93,45 @@ class AIAgent:
                 target_file=fixed_file,
                 target_line=fixed_line,
                 search_dir=search_scope,
-                max_results=max_patterns
+                max_results=max_patterns,
             )
-            
+
             # Step 2: Assess safety of each pattern location
             safety_results = []
             high_risk_files = []
             safe_files = []
-            
+
             for match in pattern_result.matches:
                 safety = self.safety_checker.check_file_safety(match.file)
-                safety_results.append({
-                    "file": match.file,
-                    "line": match.line,
-                    "risk_level": safety.risk_level.name,
-                    "safe_to_modify": safety.safe_to_modify,
-                    "confidence": match.confidence
-                })
-                
+                safety_results.append(
+                    {
+                        "file": match.file,
+                        "line": match.line,
+                        "risk_level": safety.risk_level.name,
+                        "safe_to_modify": safety.safe_to_modify,
+                        "confidence": match.confidence,
+                    }
+                )
+
                 if safety.risk_level in [RiskLevel.HIGH, RiskLevel.CRITICAL]:
                     high_risk_files.append(match.file)
                 elif safety.safe_to_modify:
                     safe_files.append(match.file)
-            
+
             # Step 3: Generate recommendations
             recommendations = self._generate_recommendations(
                 pattern_result, safety_results, high_risk_files, safe_files
             )
-            
+
             # Step 4: Calculate overall success and exit code
             success = len(pattern_result.matches) > 0
             exit_code = min(pattern_result.count, 254) if success else 255
-            
+
             # Step 5: Create summary
             summary = self._create_workflow_summary(
                 pattern_result.count, len(safe_files), len(high_risk_files)
             )
-            
+
             return WorkflowResult(
                 workflow_type="fix_and_propagate",
                 success=success,
@@ -137,18 +139,18 @@ class AIAgent:
                 similar_patterns={
                     "count": pattern_result.count,
                     "matches": [match.to_dict() for match in pattern_result.matches],
-                    "pattern_type": pattern_result.pattern_type.value
+                    "pattern_type": pattern_result.pattern_type.value,
                 },
                 safety_assessment={
                     "safe_files": len(safe_files),
                     "high_risk_files": len(high_risk_files),
                     "total_assessed": len(safety_results),
-                    "details": safety_results
+                    "details": safety_results,
                 },
                 recommendations=recommendations,
                 exit_code=exit_code,
             )
-            
+
         except Exception as e:
             return WorkflowResult(
                 workflow_type="fix_and_propagate",
@@ -170,27 +172,28 @@ class AIAgent:
         try:
             # Get repository health
             health = self.repo_analyzer.get_repo_health(str(self.repo_path))
-            
+
             # Determine readiness for changes
-            ready_for_changes = (
-                health.syntax_errors == 0 and 
-                health.health_score > 0.7
-            )
-            
+            ready_for_changes = health.syntax_errors == 0 and health.health_score > 0.7
+
             # Identify blocking issues
             blocking_issues = []
             if health.syntax_errors > 0:
-                blocking_issues.append(f"{health.syntax_errors} syntax errors need fixing")
+                blocking_issues.append(
+                    f"{health.syntax_errors} syntax errors need fixing"
+                )
             if health.health_score <= 0.5:
                 blocking_issues.append("Repository health score too low")
             if health.missing_files:
-                blocking_issues.append(f"Missing essential files: {', '.join(health.missing_files)}")
-            
+                blocking_issues.append(
+                    f"Missing essential files: {', '.join(health.missing_files)}"
+                )
+
             # Generate recommendations
             recommendations = health.recommendations.copy()
             if not ready_for_changes:
                 recommendations.insert(0, "Fix blocking issues before making changes")
-            
+
             return {
                 "ready_for_changes": ready_for_changes,
                 "blocking_issues": blocking_issues,
@@ -199,9 +202,9 @@ class AIAgent:
                 "missing_files": health.missing_files,
                 "summary": health.summary,
                 "recommendations": recommendations,
-                "exit_code": min(health.syntax_errors, 254)
+                "exit_code": min(health.syntax_errors, 254),
             }
-            
+
         except Exception as e:
             return {
                 "ready_for_changes": False,
@@ -209,7 +212,7 @@ class AIAgent:
                 "health_score": 0.0,
                 "error": str(e),
                 "recommendations": ["Fix repository analysis error"],
-                "exit_code": 255
+                "exit_code": 255,
             }
 
     def assess_change_safety(self, files_to_modify: List[str]) -> Dict[str, Any]:
@@ -227,30 +230,34 @@ class AIAgent:
             risk_levels = []
             critical_files = []
             warnings = []
-            
+
             for file_path in files_to_modify:
                 safety = self.safety_checker.check_file_safety(file_path)
-                safety_results.append({
-                    "file": file_path,
-                    "risk_level": safety.risk_level.name,
-                    "safe_to_modify": safety.safe_to_modify,
-                    "warnings": safety.warnings
-                })
-                
+                safety_results.append(
+                    {
+                        "file": file_path,
+                        "risk_level": safety.risk_level.name,
+                        "safe_to_modify": safety.safe_to_modify,
+                        "warnings": safety.warnings,
+                    }
+                )
+
                 risk_levels.append(safety.risk_level.value)
                 warnings.extend(safety.warnings)
-                
+
                 if safety.risk_level == RiskLevel.CRITICAL:
                     critical_files.append(file_path)
-            
+
             # Determine overall safety
             max_risk = max(risk_levels) if risk_levels else 0
-            safe_to_proceed = max_risk <= RiskLevel.MEDIUM.value and len(critical_files) == 0
-            
+            safe_to_proceed = (
+                max_risk <= RiskLevel.MEDIUM.value and len(critical_files) == 0
+            )
+
             # Map risk level to name
             risk_level_names = {0: "safe", 1: "medium", 2: "high", 3: "critical"}
             overall_risk = risk_level_names.get(max_risk, "unknown")
-            
+
             return {
                 "safe_to_proceed": safe_to_proceed,
                 "risk_level": overall_risk,
@@ -259,9 +266,9 @@ class AIAgent:
                 "critical_files": critical_files,
                 "file_assessments": safety_results,
                 "total_files": len(files_to_modify),
-                "exit_code": max_risk
+                "exit_code": max_risk,
             }
-            
+
         except Exception as e:
             return {
                 "safe_to_proceed": False,
@@ -269,61 +276,70 @@ class AIAgent:
                 "error": str(e),
                 "warnings": [f"Safety assessment failed: {str(e)}"],
                 "critical_files": [],
-                "exit_code": 255
+                "exit_code": 255,
             }
-    
+
     def _generate_recommendations(
-        self, 
-        pattern_result: PatternScanResult, 
-        safety_results: List[Dict[str, Any]], 
-        high_risk_files: List[str], 
-        safe_files: List[str]
+        self,
+        pattern_result: PatternScanResult,
+        safety_results: List[Dict[str, Any]],
+        high_risk_files: List[str],
+        safe_files: List[str],
     ) -> List[str]:
         """Generate actionable recommendations based on analysis results"""
         recommendations = []
-        
+
         if pattern_result.count == 0:
             recommendations.append("No similar patterns found - fix may be unique")
             return recommendations
-        
+
         if safe_files:
             recommendations.append(f"Apply fix to {len(safe_files)} safe files first")
-            
+
         if high_risk_files:
-            recommendations.append(f"Review {len(high_risk_files)} high-risk files manually")
-            recommendations.append("Consider creating backups before modifying critical files")
-            
+            recommendations.append(
+                f"Review {len(high_risk_files)} high-risk files manually"
+            )
+            recommendations.append(
+                "Consider creating backups before modifying critical files"
+            )
+
         if pattern_result.count > 10:
-            recommendations.append("Large number of patterns found - consider batch processing")
-            
+            recommendations.append(
+                "Large number of patterns found - consider batch processing"
+            )
+
         # Pattern-specific recommendations
         if pattern_result.pattern_type.value == "mkIf_home_packages":
-            recommendations.append("Nix home-manager package pattern - verify package availability")
+            recommendations.append(
+                "Nix home-manager package pattern - verify package availability"
+            )
         elif pattern_result.pattern_type.value == "homebrew_list":
-            recommendations.append("Homebrew configuration - check package names and availability")
-            
+            recommendations.append(
+                "Homebrew configuration - check package names and availability"
+            )
+
         return recommendations
-    
+
     def _create_workflow_summary(
         self, total_patterns: int, safe_files: int, high_risk_files: int
     ) -> str:
         """Create human-readable workflow summary"""
         if total_patterns == 0:
             return "No similar patterns found in codebase"
-        
+
         summary = f"Found {total_patterns} similar patterns"
-        
+
         if safe_files > 0:
             summary += f" ({safe_files} safe to modify"
-            
+
         if high_risk_files > 0:
             summary += f", {high_risk_files} high-risk"
-            
+
         if safe_files > 0:
             summary += ")"
-            
+
         return summary
-                )
 
         # Step 3: Generate recommendations
         recommendations = self._generate_fix_recommendations(
@@ -341,53 +357,6 @@ class AIAgent:
             "safety_analysis": safety_results,
             "recommendations": recommendations,
             "summary": self._generate_workflow_summary(pattern_result, safety_results),
-        }
-
-    def assess_change_safety(self, file_paths: List[str]) -> Dict[str, Any]:
-        """
-        Assess safety of making changes to multiple files
-
-        Args:
-            file_paths: List of files to assess
-
-        Returns:
-            Dict with safety assessment and recommendations
-        """
-        results = []
-        overall_risk = RiskLevel.SAFE
-
-        for file_path in file_paths:
-            safety_result = self.safety_checker.check_file_safety(file_path)
-            results.append({"file": file_path, "safety": safety_result.to_dict()})
-
-            # Track highest risk level
-            if safety_result.risk_level.value > overall_risk.value:
-                overall_risk = safety_result.risk_level
-
-        return {
-            "overall_risk": overall_risk.value,
-            "overall_risk_name": overall_risk.name,
-            "safe_to_proceed": overall_risk.value <= RiskLevel.MEDIUM.value,
-            "file_assessments": results,
-            "recommendations": self._generate_safety_recommendations(
-                results, overall_risk
-            ),
-        }
-
-    def get_repository_context(self) -> Dict[str, Any]:
-        """
-        Get comprehensive repository context for AI decision-making
-
-        Returns:
-            Dict with repository health and context information
-        """
-        health = self.repo_analyzer.get_repo_health()
-
-        return {
-            "repository_health": health.to_dict(),
-            "ready_for_changes": health.is_clean and health.syntax_errors == 0,
-            "blocking_issues": self._identify_blocking_issues(health),
-            "recommendations": self._generate_repo_recommendations(health),
         }
 
     def find_similar_patterns(

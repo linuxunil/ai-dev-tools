@@ -107,11 +107,10 @@ class SafetyChecker:
 
         if not file_path_obj.exists():
             return SafetyResult(
-                file_path=file_path,
                 risk_level=RiskLevel.CRITICAL,
+                reasons=["File does not exist"],
                 safe_to_modify=False,
-                warnings=["File does not exist"],
-                critical_sections=[],
+                recommendations=["Ensure file exists before modification"],
             )
 
         try:
@@ -120,34 +119,40 @@ class SafetyChecker:
                 lines = content.splitlines()
         except (IOError, UnicodeDecodeError) as e:
             return SafetyResult(
-                file_path=file_path,
                 risk_level=RiskLevel.HIGH,
+                reasons=[f"Cannot read file: {e}"],
                 safe_to_modify=False,
-                warnings=[f"Cannot read file: {e}"],
-                critical_sections=[],
+                recommendations=["Fix file access issues before modification"],
             )
 
         # Analyze file for risk factors
-        risk_level, warnings, critical_sections = self._analyze_file_content(
+        risk_level, reasons, recommendations = self._analyze_file_content(
             file_path_obj, content, lines
         )
 
         return SafetyResult(
-            file_path=file_path,
             risk_level=risk_level,
+            reasons=reasons,
             safe_to_modify=risk_level in [RiskLevel.SAFE, RiskLevel.MEDIUM],
-            warnings=warnings,
-            critical_sections=critical_sections,
+            recommendations=recommendations,
         )
 
+    def _analyze_file_content(
+        self, file_path_obj: Path, content: str, lines: List[str]
+    ) -> tuple[RiskLevel, List[str], List[str]]:
+        """Analyze file content for risk factors"""
+        reasons = []
+        recommendations = []
+        risk_level = RiskLevel.SAFE
+
         # Check if file is critical (exit code 3)
-        if path.name in self.critical_files:
-            reasons.append(f"🛑 Critical system file: {path.name}")
+        if file_path_obj.name in self.critical_files:
+            reasons.append(f"🛑 Critical system file: {file_path_obj.name}")
             recommendations.append("Create backup and test in VM first")
             risk_level = RiskLevel.CRITICAL
         # Check if file is high risk (exit code 2)
-        elif path.name in self.high_risk_files:
-            reasons.append(f"🚨 High-risk system file: {path.name}")
+        elif file_path_obj.name in self.high_risk_files:
+            reasons.append(f"🚨 High-risk system file: {file_path_obj.name}")
             recommendations.append("Make backup before modifying")
             risk_level = RiskLevel.HIGH
         else:
@@ -155,13 +160,16 @@ class SafetyChecker:
             risk_level = RiskLevel.SAFE
 
         # Check file extension for medium risk
-        if path.suffix in self.medium_risk_extensions and risk_level == RiskLevel.SAFE:
+        if (
+            file_path_obj.suffix in self.medium_risk_extensions
+            and risk_level == RiskLevel.SAFE
+        ):
             risk_level = RiskLevel.MEDIUM
-            reasons.append(f"⚠️ Configuration file: {path.suffix}")
+            reasons.append(f"⚠️ Configuration file: {file_path_obj.suffix}")
 
         # Check file contents for high-risk patterns
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path_obj, "r", encoding="utf-8") as f:
                 content = f.read()
 
             # Check for high-risk patterns
@@ -198,9 +206,4 @@ class SafetyChecker:
         else:  # CRITICAL
             recommendations.append("🛑 Critical risk - consider alternative approach")
 
-        return SafetyResult(
-            risk_level=risk_level,
-            reasons=reasons,
-            safe_to_modify=safe_to_modify,
-            recommendations=recommendations,
-        )
+        return risk_level, reasons, recommendations

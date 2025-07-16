@@ -86,6 +86,7 @@ def main(
     output_format = format_map[format]
 
     # Only produce output if explicitly requested (not silent)
+    output = None
     if output_format != OutputFormat.SILENT:
         if output_format == OutputFormat.COMPACT:
             # AI-optimized output
