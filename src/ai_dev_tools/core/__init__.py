@@ -5,6 +5,7 @@ from .safety_checker import SafetyChecker
 from .repo_analyzer import RepoAnalyzer
 from .context_analyzer import ContextAnalyzer
 from .difference_analyzer import DifferenceAnalyzer
+from .impact_analyzer import ImpactAnalyzer
 
 __all__ = [
     "PatternScanner",
@@ -12,4 +13,5 @@ __all__ = [
     "RepoAnalyzer",
     "ContextAnalyzer",
     "DifferenceAnalyzer",
+    "ImpactAnalyzer",
 ]
