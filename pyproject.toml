@@ -52,6 +52,7 @@ ai-impact = "ai_dev_tools.cli.impact_analyze:main"
 ai-workflow = "ai_dev_tools.cli.ai_workflow:cli"
 ai-validate = "ai_dev_tools.cli.ai_validate:validate"
 ai-helper = "ai_dev_tools.cli.ai_helper:ai_helper"
+ai-benchmark = "ai_dev_tools.cli.ai_benchmark:ai_benchmark"
 
 [project.urls]
 Homepage = "https://github.com/ai-dev-tools/ai-dev-tools"
