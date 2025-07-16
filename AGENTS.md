@@ -20,7 +20,7 @@
 - **Tools**: Use Astral tools (ruff, uv) over legacy alternatives
 
 ## Architecture Patterns
-- **Core libraries**: `src/ai_dev_tools/core/` (pattern_scanner, safety_checker, repo_analyzer)
+- **Core libraries**: `src/ai_dev_tools/core/` (pattern_scanner, safety_checker, repo_analyzer, context_analyzer)
 - **CLI tools**: `src/ai_dev_tools/cli/` with click framework
 - **Agent interface**: `src/ai_dev_tools/agents/` high-level APIs
 - **Data classes**: Use `@dataclass` with `to_dict()` methods for JSON serialization
@@ -37,6 +37,7 @@
 - **Pattern Scanner**: Exit code = number of patterns found (0-254)
 - **Safety Checker**: Exit code = risk level (0=safe, 1=medium, 2=high, 3=critical)
 - **Repo Analyzer**: Exit code = syntax error count (0=clean, N=error count)
+- **Context Analyzer**: Exit code = complexity score (0-254, higher = more complex)
 - **Errors**: Exit code 255 for invalid input/file not found
 
 ## Development Plan
@@ -46,11 +47,12 @@
 **Secondary**: Recreate functionality from ~/.nix/tools in a project-generic, AI-first manner
 
 ### Current Status
-✅ Core architecture - Complete with pattern scanner, safety checker, repo analyzer  
+✅ Core architecture - Complete with pattern scanner, safety checker, repo analyzer, context analyzer
 ✅ AI-first design - Exit codes, JSON output, token efficiency  
 ✅ AI Agent interface - High-level workflows for systematic code improvements
-✅ CLI tools - Complete command-line interface with ai-workflow commands
+✅ CLI tools - Complete command-line interface with ai-workflow and ai-context commands
 ✅ Testing & validation - Comprehensive test coverage with exit code validation
+✅ Phase 4 Started - Context analyzer (ai-context) implemented and working
 
 ### Phase 1: Core Implementation ✅ COMPLETED
 1. ✅ Complete Pattern Scanner - Structural pattern matching with Nix-specific detection
@@ -70,8 +72,8 @@
 3. ✅ Core functionality tests - Pattern scanner, safety checker, AI agent
 4. ✅ Token efficiency validation - Silent mode and AI-first design verification
 
-### Phase 4: Extended Tools & Polish (Current Priority)
-1. **Context Analysis Tool** - Recreate nix-context functionality for any project type
+### Phase 4: Extended Tools & Polish (In Progress)
+1. ✅ **Context Analysis Tool** - Project-generic context analysis with complexity scoring
 2. **Configuration Differ** - Recreate nix-diff functionality for generic config comparison
 3. **Impact Analyzer** - Recreate nix-impact functionality for change impact assessment
 4. **Validation Framework** - Recreate nix-validate functionality for project validation
