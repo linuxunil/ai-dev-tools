@@ -1,0 +1,74 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-dev-tools"
+version = "0.1.0"
+description = "AI-optimized development tools for efficient code analysis and pattern detection"
+authors = [
+    {name = "AI Development Tools", email = "dev@ai-tools.local"}
+]
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "tree-sitter>=0.20.0",
+    "tree-sitter-nix>=0.1.0",
+    "click>=8.0.0",
+    "rich>=13.0.0",
+    "pydantic>=2.0.0",
+    "pathlib",
+    "typing-extensions",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "pytest-bdd>=7.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+    "pre-commit>=3.0.0",
+]
+
+[project.scripts]
+ai-pattern-scan = "ai_dev_tools.cli.pattern_scan:main"
+ai-safety-check = "ai_dev_tools.cli.safety_check:main"
+ai-repo-status = "ai_dev_tools.cli.repo_status:main"
+
+[project.urls]
+Homepage = "https://github.com/ai-dev-tools/ai-dev-tools"
+Repository = "https://github.com/ai-dev-tools/ai-dev-tools"
+Issues = "https://github.com/ai-dev-tools/ai-dev-tools/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py38"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+ignore = []
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true

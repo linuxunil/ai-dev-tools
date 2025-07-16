@@ -1,0 +1,111 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12"]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Nix
+      uses: cachix/install-nix-action@v24
+      with:
+        nix_path: nixpkgs=channel:nixos-unstable
+
+    - name: Setup development environment
+      run: |
+        nix develop --command uv pip install -e .
+        nix develop --command uv pip install pytest pytest-bdd pytest-cov ruff mypy
+
+    - name: Lint with ruff
+      run: nix develop --command ruff check src/
+
+    - name: Format check with ruff
+      run: nix develop --command ruff format --check src/
+
+    - name: Type check with mypy
+      run: nix develop --command mypy src/
+
+    - name: Test with pytest
+      run: nix develop --command pytest --cov=src/ai_dev_tools --cov-report=xml
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+
+  integration-test:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install Nix
+      uses: cachix/install-nix-action@v24
+      with:
+        nix_path: nixpkgs=channel:nixos-unstable
+
+    - name: Setup development environment
+      run: |
+        nix develop --command uv pip install -e .
+
+    - name: Test CLI tools
+      run: |
+        nix develop --command ai-pattern-scan --help
+        nix develop --command ai-safety-check --help
+        nix develop --command ai-repo-status --help
+
+    - name: Test exit codes
+      run: |
+        # Test pattern scanner exit codes
+        nix develop --command python -c "
+        import subprocess
+        import sys
+        
+        # Test file not found (should exit 255)
+        result = subprocess.run(['ai-pattern-scan', 'nonexistent.nix:1'], capture_output=True)
+        assert result.returncode == 255, f'Expected 255, got {result.returncode}'
+        
+        print('✅ Exit code tests passed')
+        "
+
+  security:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Run security scan
+      uses: pypa/gh-action-pip-audit@v1.0.8
+      with:
+        inputs: requirements.txt
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [test, integration-test, security]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+
+    - name: Install Nix
+      uses: cachix/install-nix-action@v24
+
+    - name: Build package
+      run: nix develop --command python -m build
+
+    - name: Check package
+      run: nix develop --command twine check dist/*
