@@ -10,7 +10,7 @@ authors = [
     {name = "AI Development Tools", email = "dev@ai-tools.local"}
 ]
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
@@ -53,6 +53,7 @@ ai-workflow = "ai_dev_tools.cli.ai_workflow:cli"
 ai-validate = "ai_dev_tools.cli.ai_validate:validate"
 ai-helper = "ai_dev_tools.cli.ai_helper:ai_helper"
 ai-benchmark = "ai_dev_tools.cli.ai_benchmark:ai_benchmark"
+ai-ollama = "ai_dev_tools.cli.ai_ollama:cli"
 
 [project.urls]
 Homepage = "https://github.com/ai-dev-tools/ai-dev-tools"
