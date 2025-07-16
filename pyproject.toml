@@ -46,6 +46,7 @@ dev = [
 ai-pattern-scan = "ai_dev_tools.cli.pattern_scan:main"
 ai-safety-check = "ai_dev_tools.cli.safety_check:main"
 ai-repo-status = "ai_dev_tools.cli.repo_status:main"
+ai-workflow = "ai_dev_tools.cli.ai_workflow:cli"
 
 [project.urls]
 Homepage = "https://github.com/ai-dev-tools/ai-dev-tools"
