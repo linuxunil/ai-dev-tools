@@ -74,7 +74,7 @@
 
 ### Phase 4: Extended Tools & Polish (In Progress)
 1. ✅ **Context Analysis Tool** - Project-generic context analysis with complexity scoring
-2. **Configuration Differ** - Recreate nix-diff functionality for generic config comparison
+2. ✅ **Configuration Differ** - ai-diff tool for generic config and code comparison
 3. **Impact Analyzer** - Recreate nix-impact functionality for change impact assessment
 4. **Validation Framework** - Recreate nix-validate functionality for project validation
 5. **AI Helper Integration** - Enhanced AI assistant capabilities
@@ -99,7 +99,7 @@
 **Phase 4: Extended Tools** - Recreate original tools functionality in project-generic manner
 
 ### Current Release
-**v0.5.0-alpha** - Context analyzer complete, ready for ai-diff implementation
+**v0.6.0-alpha** - AI-Diff tool complete, configuration and code difference analysis ready
 
 ## Workflow & Requirements Documentation
 
