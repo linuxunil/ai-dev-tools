@@ -11,7 +11,7 @@ from pathlib import Path
 import tempfile
 import json
 
-from ai_dev_tools.core.exit_codes import ExitCodeEncoder, ExitCodeDecoder
+from src.ai_dev_tools.core.exit_codes import ExitCodeEncoder, ExitCodeDecoder
 
 
 class TestExitCodeEncoding:
