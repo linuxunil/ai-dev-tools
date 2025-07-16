@@ -95,7 +95,7 @@ class SafetyChecker:
 
     def check_file_safety(self, file_path: str) -> SafetyResult:
         """
-        Check if a file is safe to modify
+        Check the safety of modifying a specific file
 
         Args:
             file_path: Path to the file to check
@@ -103,18 +103,42 @@ class SafetyChecker:
         Returns:
             SafetyResult with risk assessment
         """
-        path = Path(file_path)
-        reasons = []
-        recommendations = []
+        file_path_obj = Path(file_path)
 
-        # Check if file exists
-        if not path.exists():
+        if not file_path_obj.exists():
             return SafetyResult(
+                file_path=file_path,
                 risk_level=RiskLevel.CRITICAL,
-                reasons=["File does not exist"],
                 safe_to_modify=False,
-                recommendations=["Check file path"],
+                warnings=["File does not exist"],
+                critical_sections=[],
             )
+
+        try:
+            with open(file_path_obj, "r", encoding="utf-8") as f:
+                content = f.read()
+                lines = content.splitlines()
+        except (IOError, UnicodeDecodeError) as e:
+            return SafetyResult(
+                file_path=file_path,
+                risk_level=RiskLevel.HIGH,
+                safe_to_modify=False,
+                warnings=[f"Cannot read file: {e}"],
+                critical_sections=[],
+            )
+
+        # Analyze file for risk factors
+        risk_level, warnings, critical_sections = self._analyze_file_content(
+            file_path_obj, content, lines
+        )
+
+        return SafetyResult(
+            file_path=file_path,
+            risk_level=risk_level,
+            safe_to_modify=risk_level in [RiskLevel.SAFE, RiskLevel.MEDIUM],
+            warnings=warnings,
+            critical_sections=critical_sections,
+        )
 
         # Check if file is critical (exit code 3)
         if path.name in self.critical_files:
