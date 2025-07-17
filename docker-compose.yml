@@ -1,0 +1,89 @@
+version: '3.8'
+
+services:
+  # Small Model Instance (1B) - Ultra Fast
+  ollama-small:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ollama-small
+    container_name: ai-dev-tools-ollama-small
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_small_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+      - MODEL_NAME=llama3.2:1b
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Medium Model Instance (3B) - Balanced
+  ollama-medium:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ollama-medium
+    container_name: ai-dev-tools-ollama-medium
+    ports:
+      - "11435:11434"
+    volumes:
+      - ollama_medium_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+      - MODEL_NAME=llama3.2:3b
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Large Model Instance (8B) - High Quality
+  ollama-large:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ollama-large
+    container_name: ai-dev-tools-ollama-large
+    ports:
+      - "11436:11434"
+    volumes:
+      - ollama_large_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+      - MODEL_NAME=llama3.1:8b
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Code-Specialized Instance (7B) - Code Analysis
+  ollama-code:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.ollama-code
+    container_name: ai-dev-tools-ollama-code
+    ports:
+      - "11437:11434"
+    volumes:
+      - ollama_code_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0:11434
+      - MODEL_NAME=codellama:7b
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/version"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    profiles: ["extended"]  # Optional for comprehensive testing
+
+volumes:
+  ollama_small_data:
+  ollama_medium_data:
+  ollama_large_data:
+  ollama_code_data:

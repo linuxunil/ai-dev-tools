@@ -4,10 +4,10 @@ AI Workflow CLI - High-level interface for AI agent workflows
 Provides command-line access to AI agent functionality
 """
 
-import click
-import sys
 import json
-from pathlib import Path
+import sys
+
+import click
 
 from ..agents.ai_agent import AIAgent
 

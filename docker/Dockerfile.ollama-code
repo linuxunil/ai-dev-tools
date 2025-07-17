@@ -1,0 +1,37 @@
+FROM ollama/ollama:latest
+
+# Set environment variable for model
+ENV MODEL_NAME=codellama:7b
+
+# Create a script to pull the model on startup
+RUN echo '#!/bin/bash\n\
+# Start Ollama server in background\n\
+ollama serve &\n\
+SERVER_PID=$!\n\
+\n\
+# Wait for server to be ready\n\
+echo "Waiting for Ollama server to start..."\n\
+sleep 10\n\
+\n\
+# Pull the model\n\
+echo "Pulling model: $MODEL_NAME"\n\
+ollama pull $MODEL_NAME\n\
+\n\
+# Verify model is available\n\
+echo "Verifying model: $MODEL_NAME"\n\
+ollama list\n\
+\n\
+# Keep server running\n\
+echo "Model ready! Ollama server running on port 11434"\n\
+wait $SERVER_PID\n\
+' > /usr/local/bin/start-with-model.sh && chmod +x /usr/local/bin/start-with-model.sh
+
+# Expose port
+EXPOSE 11434
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=240s --retries=5 \
+  CMD curl -f http://localhost:11434/api/version || exit 1
+
+# Start with model preloaded
+CMD ["/usr/local/bin/start-with-model.sh"]

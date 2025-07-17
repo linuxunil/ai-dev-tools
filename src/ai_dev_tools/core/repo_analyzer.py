@@ -5,11 +5,10 @@ Provides libraries for analyzing repository structure and health.
 Designed for AI agents to understand project context quickly.
 """
 
-from typing import Dict, List, Optional, Any
-from pathlib import Path
-from dataclasses import dataclass
 import subprocess
-import json
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict
 
 
 @dataclass

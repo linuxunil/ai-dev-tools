@@ -9,13 +9,12 @@ Exit Codes:
 - 255: Error (directory not found, invalid input, etc.)
 """
 
-from typing import List, Dict, Any, Optional, Set
-from pathlib import Path
 import json
-import sys
-from dataclasses import dataclass, asdict
-from enum import Enum
 import re
+from dataclasses import asdict, dataclass
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 
 class ProjectType(Enum):

@@ -4,10 +4,10 @@ AI Validate CLI - Project validation command-line interface
 Provides command-line access to project validation functionality
 """
 
-import click
-import sys
 import json
-from pathlib import Path
+import sys
+
+import click
 
 from ..core.validator import ProjectValidator
 

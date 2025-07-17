@@ -13,18 +13,16 @@ Key metrics:
 - Efficiency ratio: Token savings and time improvements
 """
 
-import time
 import json
 import threading
-from typing import Dict, List, Any, Optional, Callable, ContextManager
-from pathlib import Path
-from dataclasses import dataclass, asdict
-from datetime import datetime, timezone
 from contextlib import contextmanager
+from dataclasses import dataclass
+from datetime import datetime, timezone
 from enum import Enum
+from pathlib import Path
+from typing import Any, ContextManager, Dict, List, Optional
 
 # import psutil  # Optional dependency for memory monitoring
-import os
 
 
 class WorkflowType(Enum):

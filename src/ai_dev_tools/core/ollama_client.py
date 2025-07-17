@@ -8,14 +8,14 @@ for all AI development tools with token tracking and metrics collection.
 import json
 import subprocess
 import time
-from typing import Dict, List, Any, Optional, Union
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 from ai_dev_tools.core.metrics_collector import (
     MetricsCollector,
-    WorkflowType,
     MetricType,
+    WorkflowType,
     get_metrics_collector,
 )
 

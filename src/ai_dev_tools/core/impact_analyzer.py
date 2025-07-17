@@ -9,15 +9,11 @@ Exit Codes:
 - 255: Error (file not found, invalid input, etc.)
 """
 
-from typing import List, Dict, Any, Optional, Set, Union, Tuple
-from pathlib import Path
-import json
-import sys
-from dataclasses import dataclass, asdict
-from enum import Enum
 import re
-import ast
-import subprocess
+from dataclasses import asdict, dataclass
+from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 
 class ImpactType(Enum):
@@ -399,7 +395,7 @@ class ImpactAnalyzer:
                         path=str(rel_path),
                         impact_type=ImpactType.BUILD_IMPACT,
                         severity=severity,
-                        reason=f"Build system change affects compilation/packaging",
+                        reason="Build system change affects compilation/packaging",
                         suggestions=[
                             "Run full build and test suite",
                             "Check for build errors",

@@ -5,10 +5,9 @@ Simple CLI for safety checking - AI-optimized interface (no external dependencie
 Provides command-line interface for safety analysis with AI-friendly output
 """
 
-import sys
-import json
 import argparse
-from pathlib import Path
+import json
+import sys
 
 from ..core.safety_checker import SafetyChecker
 

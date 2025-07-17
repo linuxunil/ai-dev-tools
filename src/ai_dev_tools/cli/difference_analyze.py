@@ -4,9 +4,10 @@ CLI for difference analysis - AI-optimized interface
 Provides command-line interface for file and directory difference analysis with AI-friendly output
 """
 
-import click
 import sys
 from pathlib import Path
+
+import click
 
 from ..core.difference_analyzer import DifferenceAnalyzer
 

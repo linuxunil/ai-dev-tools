@@ -4,9 +4,10 @@ CLI for impact analysis - AI-optimized interface
 Provides command-line interface for change impact analysis with AI-friendly output
 """
 
-import click
 import sys
 from pathlib import Path
+
+import click
 
 from ..core.impact_analyzer import ImpactAnalyzer
 

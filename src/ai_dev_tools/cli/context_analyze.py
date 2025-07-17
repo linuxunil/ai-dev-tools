@@ -4,9 +4,10 @@ CLI for context analysis - AI-optimized interface
 Provides command-line interface for project context analysis with AI-friendly output
 """
 
-import click
 import sys
 from pathlib import Path
+
+import click
 
 from ..core.context_analyzer import ContextAnalyzer
 

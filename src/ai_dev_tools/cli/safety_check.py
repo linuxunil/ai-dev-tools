@@ -4,16 +4,16 @@ CLI for safety checking - AI-optimized interface
 Provides command-line interface for safety analysis with AI-friendly output
 """
 
-import click
-import sys
 import json
-from pathlib import Path
+import sys
+
+import click
 
 from ..core.safety_checker import SafetyChecker
 
 
 @click.command()
-@click.argument("file_path", required=True, help="File to check for safety")
+@click.argument("file_path")
 @click.option(
     "--format",
     type=click.Choice(["silent", "compact", "json", "human"]),
@@ -23,6 +23,9 @@ from ..core.safety_checker import SafetyChecker
 def main(file_path: str, format: str):
     """
     Check if a file is safe to modify
+    
+    Args:
+        file_path: File to check for safety
 
     Exit code: risk level (0=SAFE, 1=MEDIUM, 2=HIGH, 3=CRITICAL)
     """

@@ -6,17 +6,16 @@ standardized prompts and metrics collection.
 """
 
 import sys
-import click
-from pathlib import Path
 from typing import Optional
 
+import click
+
+from ai_dev_tools.core.metrics_collector import WorkflowType, measure_workflow
 from ai_dev_tools.core.ollama_client import (
-    OllamaClient,
     ModelSize,
     PromptType,
     get_ollama_client,
 )
-from ai_dev_tools.core.metrics_collector import WorkflowType, measure_workflow
 
 
 @click.group()
@@ -54,7 +53,7 @@ def analyze_patterns(file_path: str, model: str, format: str):
     model_size = ModelSize[model.upper()]
 
     try:
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             code_content = f.read()
     except Exception as e:
         click.echo(f"❌ Error reading file: {e}", err=True)
@@ -129,7 +128,7 @@ def check_safety(file_path: str, model: str, format: str):
     model_size = ModelSize[model.upper()]
 
     try:
-        with open(file_path, "r") as f:
+        with open(file_path) as f:
             code_content = f.read()
     except Exception as e:
         click.echo(f"❌ Error reading file: {e}", err=True)

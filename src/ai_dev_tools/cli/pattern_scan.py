@@ -4,9 +4,10 @@ CLI for pattern scanning - AI-optimized interface
 Provides command-line interface for pattern detection with AI-friendly output
 """
 
-import click
 import sys
 from pathlib import Path
+
+import click
 
 from ..core.pattern_scanner import PatternScanner, PatternType
 
@@ -73,8 +74,8 @@ def main(
     )
 
     # Output results using strategy pattern - prefer exit codes
-    from ..core.output_strategy import OutputFormatter, OutputFormat
     from ..core.exit_codes import ExitCodeEncoder
+    from ..core.output_strategy import OutputFormat, OutputFormatter
 
     format_map = {
         "silent": OutputFormat.SILENT,

@@ -7,8 +7,8 @@ human-readable formats via flags.
 
 import json
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional
 from enum import Enum
+from typing import Any, Dict, List, Optional
 
 
 class OutputFormat(Enum):

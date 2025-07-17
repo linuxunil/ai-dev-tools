@@ -6,14 +6,13 @@ dependencies, and best practices. Designed for AI agents to assess
 project health and identify issues systematically.
 """
 
-from typing import Dict, List, Optional, Any, Union
-from pathlib import Path
+import ast
+import json
+import re
 from dataclasses import dataclass
 from enum import Enum
-import subprocess
-import json
-import ast
-import re
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 
 class ValidationLevel(Enum):
@@ -158,7 +157,7 @@ class ProjectValidator:
 
             self.files_checked += 1
             try:
-                with open(py_file, "r", encoding="utf-8") as f:
+                with open(py_file, encoding="utf-8") as f:
                     content = f.read()
                 ast.parse(content)
             except SyntaxError as e:
@@ -189,7 +188,7 @@ class ProjectValidator:
 
             self.files_checked += 1
             try:
-                with open(json_file, "r", encoding="utf-8") as f:
+                with open(json_file, encoding="utf-8") as f:
                     json.load(f)
             except json.JSONDecodeError as e:
                 self.issues.append(
@@ -270,7 +269,7 @@ class ProjectValidator:
         # Check for main entry point
         package_json_path = self.project_path / "package.json"
         try:
-            with open(package_json_path, "r") as f:
+            with open(package_json_path) as f:
                 package_data = json.load(f)
 
             main_file = package_data.get("main", "index.js")
@@ -353,7 +352,7 @@ class ProjectValidator:
     def _validate_requirements_txt(self) -> None:
         """Validate requirements.txt file"""
         try:
-            with open(self.project_path / "requirements.txt", "r") as f:
+            with open(self.project_path / "requirements.txt") as f:
                 lines = f.readlines()
 
             for i, line in enumerate(lines, 1):
@@ -387,7 +386,7 @@ class ProjectValidator:
     def _validate_npm_dependencies(self) -> None:
         """Validate npm dependencies in package.json"""
         try:
-            with open(self.project_path / "package.json", "r") as f:
+            with open(self.project_path / "package.json") as f:
                 data = json.load(f)
 
             # Check for basic fields
@@ -434,7 +433,7 @@ class ProjectValidator:
                 continue
 
             try:
-                with open(py_file, "r", encoding="utf-8") as f:
+                with open(py_file, encoding="utf-8") as f:
                     content = f.read()
 
                 for pattern, message in security_patterns.items():

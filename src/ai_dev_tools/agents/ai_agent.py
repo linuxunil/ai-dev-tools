@@ -4,14 +4,13 @@ AI Agent - High-level interface for AI-assisted development workflows
 Provides composable workflows for pattern-based systematic fixes
 """
 
-from typing import Dict, List, Any, Optional
-from pathlib import Path
-import json
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Dict, List
 
 from ..core.pattern_scanner import PatternScanner, PatternScanResult
-from ..core.safety_checker import SafetyChecker, SafetyResult, RiskLevel
 from ..core.repo_analyzer import RepoAnalyzer, RepoHealth
+from ..core.safety_checker import RiskLevel, SafetyChecker, SafetyResult
 
 
 @dataclass
@@ -341,24 +340,6 @@ class AIAgent:
 
         return summary
 
-        # Step 3: Generate recommendations
-        recommendations = self._generate_fix_recommendations(
-            pattern_result, safety_results
-        )
-
-        return {
-            "workflow": "fix_and_propagate",
-            "original_fix": {
-                "file": fixed_file,
-                "line": fixed_line,
-                "pattern_type": pattern_result.pattern_type.value,
-            },
-            "similar_patterns": pattern_result.to_dict(),
-            "safety_analysis": safety_results,
-            "recommendations": recommendations,
-            "summary": self._generate_workflow_summary(pattern_result, safety_results),
-        }
-
     def find_similar_patterns(
         self, target_file: str, target_line: int, search_dir: str = "."
     ) -> PatternScanResult:
@@ -408,7 +389,8 @@ class AIAgent:
             recommendations.append("No similar patterns found - fix is isolated")
         elif pattern_result.count <= 5:
             recommendations.append(
-                f"Found {pattern_result.count} similar patterns - consider applying same fix"
+                f"Found {pattern_result.count} similar patterns - "
+                "consider applying same fix"
             )
         else:
             recommendations.append(
@@ -424,7 +406,8 @@ class AIAgent:
 
         if high_risk_files:
             recommendations.append(
-                f"⚠️  {len(high_risk_files)} high-risk files found - proceed with caution"
+                f"⚠️  {len(high_risk_files)} high-risk files found - "
+                "proceed with caution"
             )
 
         return recommendations
@@ -459,7 +442,10 @@ class AIAgent:
             [sr for sr in safety_results if sr["safety"]["safe_to_modify"]]
         )
 
-        return f"Found {pattern_result.count} similar patterns, {safe_count} safe to modify"
+        return (
+            f"Found {pattern_result.count} similar patterns, "
+            f"{safe_count} safe to modify"
+        )
 
     def _identify_blocking_issues(self, health: RepoHealth) -> List[str]:
         """Identify issues that block making changes"""

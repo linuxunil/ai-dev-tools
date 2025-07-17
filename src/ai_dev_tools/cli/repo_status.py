@@ -4,9 +4,10 @@ CLI for repository status - AI-optimized interface
 Provides command-line interface for repository analysis with AI-friendly output
 """
 
-import click
-import sys
 import json
+import sys
+
+import click
 
 from ..core.repo_analyzer import RepoAnalyzer
 

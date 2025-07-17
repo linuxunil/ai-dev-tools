@@ -11,8 +11,8 @@ This package provides libraries and CLI tools optimized for AI workflows:
 __version__ = "0.1.0"
 
 from .core.pattern_scanner import PatternScanner
-from .core.safety_checker import SafetyChecker
 from .core.repo_analyzer import RepoAnalyzer
+from .core.safety_checker import SafetyChecker
 
 __all__ = [
     "PatternScanner",

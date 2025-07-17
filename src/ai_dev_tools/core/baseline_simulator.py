@@ -12,11 +12,10 @@ The baseline represents typical AI workflows where:
 - Manual safety assessment through file inspection
 """
 
-import time
 import random
-from typing import Dict, List, Any, Optional
-from pathlib import Path
+import time
 from dataclasses import dataclass
+from typing import Any, Dict, Optional
 
 from .metrics_collector import MetricsCollector, WorkflowType
 

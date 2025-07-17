@@ -9,12 +9,12 @@ Exit Codes:
 - 255: Error (file not found, invalid input, etc.)
 """
 
-from typing import List, Dict, Any, Optional, Union
-from pathlib import Path
 import json
 import sys
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from enum import Enum
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 
 class PatternType(Enum):
@@ -195,7 +195,7 @@ class PatternScanner:
     ) -> Optional[Dict[str, Any]]:
         """Extract pattern information from target location"""
         try:
-            with open(file_path, "r") as f:
+            with open(file_path) as f:
                 lines = f.readlines()
 
             if line_number > len(lines) or line_number < 1:
@@ -261,7 +261,7 @@ class PatternScanner:
         matches = []
 
         try:
-            with open(file_path, "r") as f:
+            with open(file_path) as f:
                 lines = f.readlines()
 
             for i, line in enumerate(lines):

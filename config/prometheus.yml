@@ -1,0 +1,28 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # AI Dev Tools metrics exporter
+  - job_name: 'ai-dev-tools'
+    static_configs:
+      - targets: ['ai-metrics-exporter:8080']
+    scrape_interval: 5s
+    metrics_path: '/metrics'
+
+  # Ollama metrics (if available)
+  - job_name: 'ollama'
+    static_configs:
+      - targets: ['ollama:11434']
+    scrape_interval: 10s
+    metrics_path: '/api/metrics'
+    scrape_timeout: 5s

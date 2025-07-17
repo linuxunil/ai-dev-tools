@@ -5,10 +5,10 @@ Provides libraries for checking if code changes are safe to make.
 Designed for AI agents to assess risk before making modifications.
 """
 
-from typing import Dict, List, Optional, Union
-from pathlib import Path
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
+from typing import Dict, List, Union
 
 
 class RiskLevel(Enum):
@@ -114,10 +114,10 @@ class SafetyChecker:
             )
 
         try:
-            with open(file_path_obj, "r", encoding="utf-8") as f:
+            with open(file_path_obj, encoding="utf-8") as f:
                 content = f.read()
                 lines = content.splitlines()
-        except (IOError, UnicodeDecodeError) as e:
+        except (OSError, UnicodeDecodeError) as e:
             return SafetyResult(
                 risk_level=RiskLevel.HIGH,
                 reasons=[f"Cannot read file: {e}"],
@@ -169,7 +169,7 @@ class SafetyChecker:
 
         # Check file contents for high-risk patterns
         try:
-            with open(file_path_obj, "r", encoding="utf-8") as f:
+            with open(file_path_obj, encoding="utf-8") as f:
                 content = f.read()
 
             # Check for high-risk patterns
@@ -194,7 +194,6 @@ class SafetyChecker:
                 risk_level = RiskLevel.MEDIUM
 
         # Determine if safe to modify
-        safe_to_modify = risk_level.value <= RiskLevel.MEDIUM.value
 
         # Add appropriate recommendations
         if risk_level == RiskLevel.SAFE:

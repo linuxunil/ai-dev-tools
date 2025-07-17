@@ -6,7 +6,7 @@ Exit codes are the most token-efficient way to communicate results to AI agents.
 """
 
 from enum import Enum
-from typing import Dict, Any, Optional
+from typing import Any, Dict, Optional
 
 
 class ExitCodePattern(Enum):
@@ -163,7 +163,7 @@ def create_exit_code_result(
 ai-pattern-scan shell.nix:10 --format silent
 # Exit code 3 = found 3 patterns (no output needed)
 
-# Safety Checker - Risk-based exit codes  
+# Safety Checker - Risk-based exit codes
 ai-safety-check configuration.nix --format silent
 # Exit code 2 = HIGH risk (no output needed)
 
@@ -179,10 +179,10 @@ ai-repo-ready --format silent
 if subprocess.run(["ai-pattern-scan", "file.nix:10"]).returncode > 0:
     # Found patterns, apply fix to similar locations
     pattern_count = result.returncode
-    
+
 if subprocess.run(["ai-safety-check", "file.nix"]).returncode <= 1:
     # Safe or medium risk, proceed with changes
-    
+
 if subprocess.run(["ai-repo-status"]).returncode == 0:
     # No syntax errors, repository is clean
 """
