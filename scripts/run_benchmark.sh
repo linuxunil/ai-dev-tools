@@ -81,7 +81,7 @@ case $PROFILE in
         ;;
     medium)
         echo "⚖️  Starting medium profile (desktop): 2 models"
-        podman compose up -d $BUILD_FLAG ollama-small ollama-medium
+        podman compose --profile medium up -d $BUILD_FLAG
         ;;
     heavy)
         echo "🏋️  Starting heavy profile (server): 4 models"
