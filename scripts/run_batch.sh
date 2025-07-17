@@ -41,8 +41,8 @@ EXAMPLES:
     ./scripts/run_batch.sh scaling --dry-run
 
 BATCH DESCRIPTIONS:
-    quick:         2-3 configurations, 2-3 samples each (~5-10 min)
-    standard:      3 configurations, 5-8 samples each (~15-30 min)
+    quick:         2 configurations, 2-3 samples each (~5-10 min)
+    standard:      3 configurations, 8 samples, 10 repetitions each (80 total samples/config, ~30-60 min)
     comprehensive: 3 configurations, 10-20 samples each (~45-90 min)
     scaling:       3 configurations, 5 samples each (~15-20 min)
     sample_size:   4 configurations, 3-20 samples each (~20-40 min)
@@ -63,9 +63,9 @@ QUICK (Fast validation):
   • medium_quick:  2 models, 3 samples (desktop test)
 
 STANDARD (Production testing):
-  • light_standard:   1 model, 5 samples  (laptop benchmark)
-  • medium_standard:  2 models, 8 samples (desktop benchmark)  
-  • heavy_standard:   4 models, 6 samples (server benchmark)
+  • light_standard:   1 model, 8 samples, 10 repetitions (80 total samples)
+  • medium_standard:  2 models, 8 samples, 10 repetitions (80 total samples)  
+  • heavy_standard:   4 models, 8 samples, 10 repetitions (80 total samples)
 
 COMPREHENSIVE (Exhaustive analysis):
   • light_comprehensive:   1 model, 10 samples  (deep laptop analysis)

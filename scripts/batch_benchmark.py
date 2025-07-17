@@ -33,7 +33,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 class BatchConfiguration:
-    def __init__(self, name: str, profile: str, sample_size: int, description: str = ""):
+    def __init__(self, name: str, profile: str, sample_size: int, repetitions: int = 1, description: str = ""):
         self.name = name
         self.profile = profile
         self.sample_size = sample_size
@@ -50,33 +50,33 @@ class BatchRunner:
         
         return {
             "quick": [
-                BatchConfiguration("light_quick", "light", 2, "Quick laptop test"),
-                BatchConfiguration("medium_quick", "medium", 3, "Quick desktop test")
+                BatchConfiguration("light_quick", "light", 2, 1, "Quick laptop test (2 samples)"),
+                BatchConfiguration("medium_quick", "medium", 3, 1, "Quick desktop test (3 samples)")
             ],
             
             "standard": [
-                BatchConfiguration("light_standard", "light", 5, "Standard laptop benchmark"),
-                BatchConfiguration("medium_standard", "medium", 8, "Standard desktop benchmark"),
-                BatchConfiguration("heavy_standard", "heavy", 6, "Standard server benchmark")
+                BatchConfiguration("light_standard", "light", 8, 10, "Standard laptop benchmark (80 total samples)"),
+                BatchConfiguration("medium_standard", "medium", 8, 10, "Standard desktop benchmark (80 total samples)"),
+                BatchConfiguration("heavy_standard", "heavy", 8, 10, "Standard server benchmark (80 total samples)")
             ],
             
             "comprehensive": [
-                BatchConfiguration("light_comprehensive", "light", 10, "Comprehensive laptop analysis"),
-                BatchConfiguration("medium_comprehensive", "medium", 15, "Comprehensive desktop analysis"),
-                BatchConfiguration("heavy_comprehensive", "heavy", 20, "Comprehensive server analysis")
+                BatchConfiguration("light_comprehensive", "light", 10, 1, "Comprehensive laptop analysis (10 samples)"),
+                BatchConfiguration("medium_comprehensive", "medium", 15, 1, "Comprehensive desktop analysis (15 samples)"),
+                BatchConfiguration("heavy_comprehensive", "heavy", 20, 1, "Comprehensive server analysis (20 samples)")
             ],
             
             "scaling": [
-                BatchConfiguration("scaling_small", "light", 5, "Small model scaling test"),
-                BatchConfiguration("scaling_medium", "medium", 5, "Medium model scaling test"),
-                BatchConfiguration("scaling_large", "heavy", 5, "Large model scaling test")
+                BatchConfiguration("scaling_small", "light", 5, 1, "Small model scaling test (5 samples)"),
+                BatchConfiguration("scaling_medium", "medium", 5, 1, "Medium model scaling test (5 samples)"),
+                BatchConfiguration("scaling_large", "heavy", 5, 1, "Large model scaling test (5 samples)")
             ],
             
             "sample_size": [
-                BatchConfiguration("samples_3", "medium", 3, "Low sample count"),
-                BatchConfiguration("samples_6", "medium", 6, "Medium sample count"),
-                BatchConfiguration("samples_12", "medium", 12, "High sample count"),
-                BatchConfiguration("samples_20", "medium", 20, "Very high sample count")
+                BatchConfiguration("samples_3", "medium", 3, 1, "Low sample count (3 samples)"),
+                BatchConfiguration("samples_6", "medium", 6, 1, "Medium sample count (6 samples)"),
+                BatchConfiguration("samples_12", "medium", 12, 1, "High sample count (12 samples)"),
+                BatchConfiguration("samples_20", "medium", 20, 1, "Very high sample count (20 samples)")
             ]
         }
     
@@ -84,9 +84,10 @@ class BatchRunner:
         """Run a single benchmark configuration"""
         
         logger.info(f"🔄 Running batch: {config.name} ({config.description})")
-        logger.info(f"   Profile: {config.profile}, Samples: {config.sample_size}")
+        logger.info(f"   Profile: {config.profile}, Samples per run: {config.sample_size}, Repetitions: {config.repetitions}")
         
         start_time = time.time()
+        all_run_results = []
         
         try:
             # Get instances for this profile
@@ -104,34 +105,43 @@ class BatchRunner:
                     "duration": time.time() - start_time
                 }
             
-            # Create tasks
+            # Create tasks once
             tasks = create_benchmark_tasks()
             
-            # Run benchmark
-            results = await run_comprehensive_benchmark_async(
-                ready_instances, tasks, config.sample_size
-            )
+            for i in range(config.repetitions):
+                logger.info(f"   Running repetition {i+1}/{config.repetitions} for {config.name}")
+                
+                # Run benchmark
+                results = await run_comprehensive_benchmark_async(
+                    ready_instances, tasks, config.sample_size
+                )
+                all_run_results.append(results)
+            
+            # Aggregate results from all repetitions
+            aggregated_results = self._aggregate_repetition_results(all_run_results)
             
             # Add batch info
-            results["batch_info"] = {
+            aggregated_results["batch_info"] = {
                 "config_name": config.name,
                 "profile": config.profile,
-                "sample_size": config.sample_size,
+                "sample_size_per_run": config.sample_size,
+                "repetitions": config.repetitions,
+                "total_samples": config.sample_size * config.repetitions,
                 "description": config.description,
                 "instances_used": len(ready_instances),
                 "batch_duration": time.time() - start_time
             }
             
             # Calculate improvements
-            improvements = calculate_improvement_stats(results)
-            results["improvements"] = improvements
+            improvements = calculate_improvement_stats(aggregated_results)
+            aggregated_results["improvements"] = improvements
             
             logger.info(f"✅ Completed {config.name} in {time.time() - start_time:.1f}s")
             
             return {
                 "config": config.__dict__,
                 "success": True,
-                "results": results,
+                "results": aggregated_results,
                 "duration": time.time() - start_time
             }
             
@@ -275,6 +285,62 @@ class BatchRunner:
             }
         
         return {}
+
+    def _aggregate_repetition_results(self, all_run_results: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Aggregates results from multiple benchmark repetitions."""
+        if not all_run_results:
+            return {}
+
+        aggregated_data: Dict[str, Dict[str, List[float]]] = {}
+        aggregated_metrics: Dict[str, Dict[str, List[float]]] = {}
+
+        for run_result in all_run_results:
+            if "data" in run_result:
+                for model_name, model_data in run_result["data"].items():
+                    if model_name not in aggregated_data:
+                        aggregated_data[model_name] = {"total_tokens": [], "total_time": []}
+                    aggregated_data[model_name]["total_tokens"].append(model_data.get("total_tokens", 0))
+                    aggregated_data[model_name]["total_time"].append(model_data.get("total_time", 0))
+            
+            if "metrics" in run_result:
+                for model_name, model_metrics in run_result["metrics"].items():
+                    if model_name not in aggregated_metrics:
+                        aggregated_metrics[model_name] = {
+                            "avg_tokens_per_task": [],
+                            "avg_time_per_task": [],
+                            "success_rate": [],
+                            "avg_token_efficiency": [],
+                            "avg_time_efficiency": []
+                        }
+                    aggregated_metrics[model_name]["avg_tokens_per_task"].append(model_metrics.get("avg_tokens_per_task", 0))
+                    aggregated_metrics[model_name]["avg_time_per_task"].append(model_metrics.get("avg_time_per_task", 0))
+                    aggregated_metrics[model_name]["success_rate"].append(model_metrics.get("success_rate", 0))
+                    aggregated_metrics[model_name]["avg_token_efficiency"].append(model_metrics.get("avg_token_efficiency", 0))
+                    aggregated_metrics[model_name]["avg_time_efficiency"].append(model_metrics.get("avg_time_efficiency", 0))
+
+        final_aggregated_results: Dict[str, Any] = {"data": {}, "metrics": {}}
+
+        for model_name, data_values in aggregated_data.items():
+            final_aggregated_results["data"][model_name] = {
+                "total_tokens": statistics.mean(data_values["total_tokens"]) if data_values["total_tokens"] else 0,
+                "total_time": statistics.mean(data_values["total_time"]) if data_values["total_time"] else 0,
+            }
+        
+        for model_name, metric_values in aggregated_metrics.items():
+            final_aggregated_results["metrics"][model_name] = {
+                "avg_tokens_per_task": statistics.mean(metric_values["avg_tokens_per_task"]) if metric_values["avg_tokens_per_task"] else 0,
+                "avg_time_per_task": statistics.mean(metric_values["avg_time_per_task"]) if metric_values["avg_time_per_task"] else 0,
+                "success_rate": statistics.mean(metric_values["success_rate"]) if metric_values["success_rate"] else 0,
+                "avg_token_efficiency": statistics.mean(metric_values["avg_token_efficiency"]) if metric_values["avg_token_efficiency"] else 0,
+                "avg_time_efficiency": statistics.mean(metric_values["avg_time_efficiency"]) if metric_values["avg_time_efficiency"] else 0,
+            }
+        
+        # Preserve other top-level keys if they exist and are consistent (e.g., 'baseline_metrics')
+        # For simplicity, we'll assume 'baseline_metrics' is consistent across runs or take from the first run
+        if "baseline_metrics" in all_run_results[0]:
+            final_aggregated_results["baseline_metrics"] = all_run_results[0]["baseline_metrics"]
+
+        return final_aggregated_results
 
 async def main():
     parser = argparse.ArgumentParser(description="AI Development Tools Batch Benchmark Suite")
