@@ -143,31 +143,28 @@ async def wait_for_instances(instances: List[ModelInstance], max_wait: int = 300
         ready_instances = []
         
         while time.time() - start_time < max_wait:
-            pending_instances = [inst for inst in instances if not inst.ready]
-            
-            if not pending_instances:
-                break
-            
-            # Check health of pending instances
-            health_tasks = [check_instance_health(session, inst) for inst in pending_instances]
+            # Check health of all instances
+            health_tasks = [check_instance_health(session, inst) for inst in instances]
             await asyncio.gather(*health_tasks, return_exceptions=True)
             
-            # Update ready list
-            ready_instances = [inst for inst in instances if inst.ready]
+            # Check if all instances are ready
+            all_currently_ready = all(inst.ready for inst in instances)
+            if all_currently_ready:
+                logger.info(f"All {len(instances)} instances are ready: {[inst.name for inst in instances]}")
+                return instances
             
-            if ready_instances:
-                ready_names = [inst.name for inst in ready_instances]
+            # Log which instances are ready/not ready
+            ready_names = [inst.name for inst in instances if inst.ready]
+            not_ready_names = [inst.name for inst in instances if not inst.ready]
+            if ready_names:
                 logger.info(f"Ready: {ready_names}")
+            if not_ready_names:
+                logger.info(f"Not ready: {not_ready_names}")
             
-            if len(ready_instances) < len(instances):
-                await asyncio.sleep(10)
+            await asyncio.sleep(10) # Wait before next check
         
-        final_ready = [inst for inst in instances if inst.ready]
-        if len(final_ready) < len(instances):
-            not_ready = [inst.name for inst in instances if not inst.ready]
-            logger.warning(f"Instances not ready after {max_wait}s: {not_ready}")
-        
-        return final_ready
+        logger.warning(f"Not all Ollama instances are ready after {max_wait}s.")
+        return [inst for inst in instances if inst.ready] # Return whatever is ready
 
 async def run_task_samples_async(session: aiohttp.ClientSession,
                                 instance: ModelInstance,
