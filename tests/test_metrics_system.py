@@ -11,8 +11,8 @@ from pathlib import Path
 
 import pytest
 
-from src.ai_dev_tools.core.baseline_simulator import BaselineSimulator
-from src.ai_dev_tools.core.metrics_collector import (
+from ai_dev_tools.core.baseline_simulator import BaselineSimulator
+from ai_dev_tools.core.metrics_collector import (
     MetricsCollector,
     MetricType,
     WorkflowMetrics,

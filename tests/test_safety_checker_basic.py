@@ -7,7 +7,7 @@ Tests core safety checking functionality to ensure it works correctly.
 import tempfile
 from pathlib import Path
 
-from src.ai_dev_tools.core.safety_checker import RiskLevel, SafetyChecker
+from ai_dev_tools.core.safety_checker import RiskLevel, SafetyChecker
 
 
 class TestSafetyCheckerBasic:

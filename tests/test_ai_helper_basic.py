@@ -10,7 +10,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from src.ai_dev_tools.core.ai_helper import AIHelper, HelperWorkflowResult
+from ai_dev_tools.core.ai_helper import AIHelper, HelperWorkflowResult
 
 
 class TestAIHelper:

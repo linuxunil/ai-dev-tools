@@ -7,7 +7,7 @@ Tests core AI Agent functionality to ensure workflows work correctly.
 import tempfile
 from pathlib import Path
 
-from src.ai_dev_tools.agents.ai_agent import AIAgent
+from ai_dev_tools.agents.ai_agent import AIAgent
 
 
 class TestAIAgentBasic:

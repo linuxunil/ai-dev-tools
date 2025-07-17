@@ -7,7 +7,7 @@ Tests core pattern scanning functionality to ensure it works correctly.
 import tempfile
 from pathlib import Path
 
-from src.ai_dev_tools.core.pattern_scanner import PatternScanner, PatternType
+from ai_dev_tools.core.pattern_scanner import PatternScanner, PatternType
 
 
 class TestPatternScannerBasic:

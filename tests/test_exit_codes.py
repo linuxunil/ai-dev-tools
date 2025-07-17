@@ -9,7 +9,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from src.ai_dev_tools.core.exit_codes import ExitCodeDecoder, ExitCodeEncoder
+from ai_dev_tools.core.exit_codes import ExitCodeDecoder, ExitCodeEncoder
 
 
 class TestExitCodeEncoding:
