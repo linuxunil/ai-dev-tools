@@ -118,7 +118,8 @@ async def run_task_samples_async(session: aiohttp.ClientSession,
                                  task: BenchmarkTask,
                                  approach: str,
                                  prompt: str,
-                                 sample_size: int) -> List[Dict[str, Any]]:    """Run multiple samples of a task on one instance"""
+                                 sample_size: int) -> List[Dict[str, Any]]:
+    """Run multiple samples of a task on one instance"""
     
     logger.info(f"Running {task.name} {approach} on {instance.name} ({sample_size} samples)")
     
