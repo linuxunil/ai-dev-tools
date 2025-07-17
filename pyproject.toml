@@ -87,23 +87,23 @@ warn_unused_configs = true
 disallow_untyped_defs = true
 
 [tool.ai-dev-tools.benchmark]
-ollama_profiles = {
-    light = [
-        { name = "small", model = "llama3.2:1b", host = "localhost", port = 11434 }
-    ],
-    medium = [
-        { name = "small", model = "llama3.2:1b", host = "localhost", port = 11434 },
-        { name = "medium", model = "llama3.2:3b", host = "localhost", port = 11435 }
-    ],
-    heavy = [
-        { name = "small", model = "llama3.2:1b", host = "localhost", port = 11434 },
-        { name = "medium", model = "llama3.2:3b", host = "localhost", port = 11435 },
-        { name = "large", model = "llama3.1:8b", host = "localhost", port = 11436 },
-        { name = "code", model = "codellama:7b", host = "localhost", port = 11437 }
-    ]
-}
-sample_sizes = {
-    light = 3,
-    medium = 6,
-    heavy = 12
-}
+
+[tool.ai-dev-tools.benchmark.ollama_profiles]
+light = [
+    { name = "small", model = "llama3.2:1b", host = "localhost", port = 11434 }
+]
+medium = [
+    { name = "small", model = "llama3.2:1b", host = "localhost", port = 11434 },
+    { name = "medium", model = "llama3.2:3b", host = "localhost", port = 11435 }
+]
+heavy = [
+    { name = "small", model = "llama3.2:1b", host = "localhost", port = 11434 },
+    { name = "medium", model = "llama3.2:3b", host = "localhost", port = 11435 },
+    { name = "large", model = "llama3.1:8b", host = "localhost", port = 11436 },
+    { name = "code", model = "codellama:7b", host = "localhost", port = 11437 }
+]
+
+[tool.ai-dev-tools.benchmark.sample_sizes]
+light = 3
+medium = 6
+heavy = 12

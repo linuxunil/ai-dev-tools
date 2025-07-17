@@ -77,15 +77,15 @@ echo "=" * 50
 case $PROFILE in
     light)
         echo "🪶 Starting light profile (laptop): 1 model"
-        docker compose up -d $BUILD_FLAG ollama-small
+        podman compose up -d $BUILD_FLAG ollama-small
         ;;
     medium)
         echo "⚖️  Starting medium profile (desktop): 2 models"
-        docker compose up -d $BUILD_FLAG ollama-small ollama-medium
+        podman compose up -d $BUILD_FLAG ollama-small ollama-medium
         ;;
     heavy)
         echo "🏋️  Starting heavy profile (server): 4 models"
-        docker compose --profile extended up -d $BUILD_FLAG
+        podman compose --profile extended up -d $BUILD_FLAG
         ;;
 esac
 

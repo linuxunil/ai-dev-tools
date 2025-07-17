@@ -295,6 +295,12 @@ def create_benchmark_tasks() -> List[BenchmarkTask]:
             baseline_prompt="Analyze project with files: user.py, order.py, api.py, tests/. What's the architecture?",
             tools_prompt="Based on context: {\"architecture\": \"microservices\", \"complexity\": 6}, provide summary.",
             workflow_type=WorkflowType.CONTEXT_ANALYSIS
+        ),
+        BenchmarkTask(
+            name="TensorFlow Math Ops Context",
+            baseline_prompt="Given the file `tensorflow/python/ops/math_ops.py`, describe its role in TensorFlow, its main functionalities, and its key internal and external dependencies. Focus on how it integrates with the broader TensorFlow ecosystem.",
+            tools_prompt="Based on an analysis of `tensorflow/python/ops/math_ops.py`, provide a summary of its architectural role, core functionalities, and significant dependencies within TensorFlow.",
+            workflow_type=WorkflowType.CONTEXT_ANALYSIS
         )
     ]
 

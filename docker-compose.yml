@@ -20,6 +20,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    profiles: ["light"]
 
   # Medium Model Instance (3B) - Balanced
   ollama-medium:
@@ -40,6 +41,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    profiles: ["medium"]
 
   # Large Model Instance (8B) - High Quality
   ollama-large:
@@ -60,6 +62,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+    profiles: ["heavy"]
 
   # Code-Specialized Instance (7B) - Code Analysis
   ollama-code:
