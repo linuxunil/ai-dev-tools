@@ -16,6 +16,7 @@ import sys
 from datetime import datetime
 from typing import List, Dict, Any, Tuple
 import logging
+import toml
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
@@ -25,6 +26,18 @@ from ai_dev_tools.core.metrics_collector import measure_workflow, WorkflowType
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
+
+# Load configuration from pyproject.toml
+def load_config():
+    try:
+        with open(Path(__file__).parent.parent / "pyproject.toml", "r") as f:
+            return toml.load(f)
+    except FileNotFoundError:
+        logger.error("pyproject.toml not found. Ensure you are running from the project root or script directory.")
+        exit(1)
+
+CONFIG = load_config()
+BENCHMARK_CONFIG = CONFIG.get("tool", {}).get("ai-dev-tools", {}).get("benchmark", {})
 
 class ModelInstance:
     def __init__(self, name: str, model: str, host: str, port: int):
@@ -338,30 +351,10 @@ def calculate_improvement_stats(all_results: Dict[str, Any]) -> Dict[str, Any]:
     return improvements
 
 def get_benchmark_profile(profile: str) -> List[ModelInstance]:
-    """Get model instances based on hardware profile"""
-    
-    profiles = {
-        # Laptop: Single small model, minimal resource usage
-        "light": [
-            ModelInstance("small", "llama3.2:1b", "localhost", 11434)
-        ],
-        
-        # Desktop: 2-3 models, balanced performance
-        "medium": [
-            ModelInstance("small", "llama3.2:1b", "localhost", 11434),
-            ModelInstance("medium", "llama3.2:3b", "localhost", 11435)
-        ],
-        
-        # Server: All models, maximum performance testing
-        "heavy": [
-            ModelInstance("small", "llama3.2:1b", "localhost", 11434),
-            ModelInstance("medium", "llama3.2:3b", "localhost", 11435), 
-            ModelInstance("large", "llama3.1:8b", "localhost", 11436),
-            ModelInstance("code", "codellama:7b", "localhost", 11437)
-        ]
-    }
-    
-    return profiles.get(profile, profiles["medium"])
+    """Get model instances based on hardware profile from configuration"""
+    profile_configs = BENCHMARK_CONFIG.get("ollama_profiles", {})
+    selected_profile = profile_configs.get(profile, profile_configs.get("medium", []))
+    return [ModelInstance(**p) for p in selected_profile]
 
 async def main():
     import argparse
@@ -378,8 +371,8 @@ async def main():
     
     args = parser.parse_args()
     
-    # Auto-scale sample sizes based on profile
-    sample_sizes = {"light": 3, "medium": 6, "heavy": 12}
+    # Auto-scale sample sizes based on profile from configuration
+    sample_sizes = BENCHMARK_CONFIG.get("sample_sizes", {"light": 3, "medium": 6, "heavy": 12})
     sample_size = args.samples or sample_sizes[args.profile]
     
     print("🚀 AI Development Tools Benchmark Suite")
