@@ -107,6 +107,12 @@ class TestBenchmarkRunner:
         config.output_directory = Path("/tmp/benchmark_results")
         config.get_sample_size.return_value = 3
         config.validate_runtime.return_value = []
+        config.execution_mode = Mock(value="async")
+        config.output_format = Mock(value="json")
+        config.docker_compose_file = Path("docker-compose.yml")
+        config.container_startup_timeout = 180
+        config.task_timeout = 30
+        config.retry_attempts = 3
         config.batch_configurations = {
             "quick": Mock(
                 name="quick",
@@ -402,7 +408,7 @@ class TestConvenienceFunctions:
         )
         
         with patch('ai_dev_tools.benchmark.core.BenchmarkRunner') as mock_runner_class:
-            mock_runner = Mock()
+            mock_runner = AsyncMock()
             mock_runner.run_quick_benchmark.return_value = mock_result
             mock_runner_class.return_value = mock_runner
             
@@ -450,7 +456,7 @@ class TestConvenienceFunctions:
         }
         
         with patch('ai_dev_tools.benchmark.core.BenchmarkRunner') as mock_runner_class:
-            mock_runner = Mock()
+            mock_runner = AsyncMock()
             mock_runner.run_comparison_benchmark.return_value = mock_results
             mock_runner_class.return_value = mock_runner
             
@@ -476,7 +482,7 @@ class TestConvenienceFunctions:
         }
         
         with patch('ai_dev_tools.benchmark.core.BenchmarkRunner') as mock_runner_class:
-            mock_runner = Mock()
+            mock_runner = AsyncMock()
             mock_runner.run_batch_benchmark.return_value = mock_results
             mock_runner_class.return_value = mock_runner
             

@@ -219,7 +219,7 @@ class MetricsCollector:
         total_tokens = sum(r.total_tokens for r in results)
         total_input_tokens = sum(r.input_tokens for r in results)
         total_output_tokens = sum(r.output_tokens for r in results)
-        average_tokens_per_task = total_tokens / total_tasks if total_tasks > 0 else 0.0
+        average_tokens_per_task = total_tokens / completed_tasks if completed_tasks > 0 else 0.0
 
         # Performance metrics
         overall_duration = (self.end_time or time.time()) - (self.start_time or time.time())

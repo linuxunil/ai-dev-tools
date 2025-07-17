@@ -262,8 +262,10 @@ setting = "value"
             f.write(toml_content)
             f.flush()
             
-            with pytest.raises(ValueError):
-                BenchmarkConfig.from_toml(f.name)
+            # Should return default config, not raise error
+            config = BenchmarkConfig.from_toml(f.name)
+            assert len(config.profiles) == 3
+            assert config.execution_mode == ExecutionMode.ASYNC
     
     def test_load_config_default(self):
         """Test loading default configuration."""

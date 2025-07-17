@@ -114,7 +114,8 @@ class BenchmarkConfig(BaseModel):
 
     # Batch configurations
     batch_configurations: Dict[str, BatchConfiguration] = Field(
-        default_factory=dict, description="Predefined batch configurations"
+        default_factory=lambda: BenchmarkConfig._create_default_batch_configs(),
+        description="Predefined batch configurations",
     )
 
     # Task settings
@@ -122,21 +123,23 @@ class BenchmarkConfig(BaseModel):
 
     retry_attempts: int = Field(default=3, ge=1, le=10, description="Number of retry attempts for failed tasks")
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def validate_profiles(self):
         """Ensure all profiles have valid configurations."""
         profiles = self.profiles
         sample_sizes = self.sample_sizes
 
-        for profile in HardwareProfile:
-            if profile not in profiles:
-                raise ValueError(f"Missing configuration for profile: {profile}")
+        # Only validate if profiles are provided
+        if profiles:
+            for profile in HardwareProfile:
+                if profile not in profiles:
+                    raise ValueError(f"Missing configuration for profile: {profile}")
 
-            if not profiles[profile]:
-                raise ValueError(f"Empty model instances for profile: {profile}")
+                if not profiles[profile]:
+                    raise ValueError(f"Empty model instances for profile: {profile}")
 
-            if profile not in sample_sizes:
-                raise ValueError(f"Missing sample size for profile: {profile}")
+                if profile not in sample_sizes:
+                    raise ValueError(f"Missing sample size for profile: {profile}")
 
         return self
 
@@ -185,11 +188,7 @@ class BenchmarkConfig(BaseModel):
                 continue  # Skip unknown profiles
 
         # Fill in missing sample sizes with defaults
-        default_sample_sizes = {
-            HardwareProfile.LIGHT: 3,
-            HardwareProfile.MEDIUM: 6,
-            HardwareProfile.HEAVY: 12
-        }
+        default_sample_sizes = {HardwareProfile.LIGHT: 3, HardwareProfile.MEDIUM: 6, HardwareProfile.HEAVY: 12}
         for profile in HardwareProfile:
             if profile not in config_data["sample_sizes"]:
                 config_data["sample_sizes"][profile] = default_sample_sizes[profile]
@@ -234,9 +233,7 @@ class BenchmarkConfig(BaseModel):
     def _get_default_profile_instances(profile: HardwareProfile) -> List[ModelInstance]:
         """Get default model instances for a hardware profile."""
         if profile == HardwareProfile.LIGHT:
-            return [
-                ModelInstance(name="small", model="llama3.2:1b", port=11434)
-            ]
+            return [ModelInstance(name="small", model="llama3.2:1b", port=11434)]
         elif profile == HardwareProfile.MEDIUM:
             return [
                 ModelInstance(name="small", model="llama3.2:1b", port=11434),
@@ -317,12 +314,12 @@ class BenchmarkConfig(BaseModel):
         # Validate profile configurations
         for profile, instances in self.profiles.items():
             if not instances:
-                issues.append(f"No model instances configured for profile: {profile}")
+                issues.append(f"No model instances configured for profile: {profile.value}")
 
             # Check for port conflicts
             ports = [instance.port for instance in instances]
             if len(ports) != len(set(ports)):
-                issues.append(f"Port conflicts in profile {profile}: {ports}")
+                issues.append(f"Port conflicts in profile {profile.value}: {ports}")
 
         return issues
 

@@ -328,8 +328,8 @@ class TestMetricsCollector:
                 status=TaskStatus.COMPLETED,
                 start_time=1000.0 + i
             )
-            result.duration = 10.0  # Slower
             result.mark_completed(f"Baseline response {i}", 200, 400)  # More tokens
+            result.duration = 10.0  # Slower
             collector.task_results.append(result)
         
         # Add tools results (faster, fewer tokens)
@@ -341,8 +341,8 @@ class TestMetricsCollector:
                 status=TaskStatus.COMPLETED,
                 start_time=1000.0 + i
             )
-            result.duration = 6.0  # Faster
             result.mark_completed(f"Tools response {i}", 150, 250)  # Fewer tokens
+            result.duration = 6.0  # Faster
             collector.task_results.append(result)
         
         collector.start_time = 1000.0

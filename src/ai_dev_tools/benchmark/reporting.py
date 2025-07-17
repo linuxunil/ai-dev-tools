@@ -24,10 +24,17 @@ class ReportGenerator:
     def generate_report(
         self,
         benchmark_data: Dict[str, Any],
-        format_type: OutputFormat = OutputFormat.JSON,
+        format_type: Union[OutputFormat, str] = OutputFormat.JSON,
         filename: Optional[str] = None,
     ) -> str:
         """Generate a report in the specified format."""
+        # Convert string to OutputFormat enum if needed
+        if isinstance(format_type, str):
+            try:
+                format_type = OutputFormat(format_type)
+            except ValueError:
+                raise ValueError(f"Unsupported format: {format_type}")
+
         if filename is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             profile = benchmark_data.get("benchmark_info", {}).get("profile", "unknown")
@@ -609,7 +616,9 @@ class ReportGenerator:
                 improvement = 0
                 winner = "Tie"
 
-            lines.append(f"│ {metric_name:<12} │ Baseline: {baseline_val:8.2f}{unit:<6} │ Tools: {tools_val:8.2f}{unit:<6} │")
+            lines.append(
+                f"│ {metric_name:<12} │ Baseline: {baseline_val:8.2f}{unit:<6} │ Tools: {tools_val:8.2f}{unit:<6} │"
+            )
             lines.append(f"│              │ Winner: {winner:<8} │ Improvement: {improvement:+6.1f}% │")
             lines.append("├─────────────────────────────────────────────────────────────┤")
 
@@ -662,8 +671,12 @@ class ReportGenerator:
                 latest_comparison = latest_data.get("comparison_metrics", {})
 
                 if first_comparison and latest_comparison:
-                    token_change = latest_comparison.get("token_reduction_percent", 0) - first_comparison.get("token_reduction_percent", 0)
-                    time_change = latest_comparison.get("time_reduction_percent", 0) - first_comparison.get("time_reduction_percent", 0)
+                    token_change = latest_comparison.get("token_reduction_percent", 0) - first_comparison.get(
+                        "token_reduction_percent", 0
+                    )
+                    time_change = latest_comparison.get("time_reduction_percent", 0) - first_comparison.get(
+                        "time_reduction_percent", 0
+                    )
 
                     lines.append("📊 Change Since First Run:")
                     lines.append(f"  Token Reduction: {token_change:+.1f}% change")

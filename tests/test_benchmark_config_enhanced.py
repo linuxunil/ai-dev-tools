@@ -106,7 +106,6 @@ class TestEnhancedBenchmarkConfig:
         light = 2
         medium = 4
         
-        [tool.ai-dev-tools.benchmark.ollama_profiles.light]
         [[tool.ai-dev-tools.benchmark.ollama_profiles.light]]
         name = "custom-small"
         model = "custom:1b"
@@ -157,7 +156,6 @@ class TestEnhancedBenchmarkConfig:
         medium = 3
         heavy = 6
         
-        [tool.ai-dev-tools.benchmark.ollama_profiles.light]
         [[tool.ai-dev-tools.benchmark.ollama_profiles.light]]
         name = "tiny"
         model = "llama3.2:1b"
@@ -165,7 +163,6 @@ class TestEnhancedBenchmarkConfig:
         timeout = 20
         max_concurrent = 2
         
-        [tool.ai-dev-tools.benchmark.ollama_profiles.medium]
         [[tool.ai-dev-tools.benchmark.ollama_profiles.medium]]
         name = "small"
         model = "llama3.2:1b"
@@ -176,7 +173,6 @@ class TestEnhancedBenchmarkConfig:
         model = "llama3.2:3b"
         port = 11435
         
-        [tool.ai-dev-tools.benchmark.ollama_profiles.heavy]
         [[tool.ai-dev-tools.benchmark.ollama_profiles.heavy]]
         name = "small"
         model = "llama3.2:1b"
@@ -234,13 +230,11 @@ class TestEnhancedBenchmarkConfig:
         toml_content = """
         [tool.ai-dev-tools.benchmark]
         
-        [tool.ai-dev-tools.benchmark.ollama_profiles.invalid_profile]
         [[tool.ai-dev-tools.benchmark.ollama_profiles.invalid_profile]]
         name = "test"
         model = "test:1b"
         port = 11434
         
-        [tool.ai-dev-tools.benchmark.ollama_profiles.light]
         [[tool.ai-dev-tools.benchmark.ollama_profiles.light]]
         name = "valid"
         model = "llama3.2:1b"
@@ -357,10 +351,12 @@ class TestEnhancedBenchmarkConfig:
         """Test runtime validation."""
         config = BenchmarkConfig._create_default_config()
         
-        # Test with valid configuration
+        # Test with valid configuration - may or may not have issues depending on environment
         issues = config.validate_runtime()
         
-        # Should have issue with docker-compose file not existing
+        # Test with missing docker-compose file
+        config.docker_compose_file = Path("/nonexistent/docker-compose.yml")
+        issues = config.validate_runtime()
         assert len(issues) > 0
         assert any("Docker compose file not found" in issue for issue in issues)
         
