@@ -434,7 +434,9 @@ async def main():
         print(f"   Concurrent instances: {len(ready_instances)}")
     
     # Save results
-    output_file = f"benchmark_{args.profile}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+    output_dir = Path("benchmark_results")
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_file = output_dir / f"benchmark_{args.profile}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
     with open(output_file, 'w') as f:
         json.dump(results, f, indent=2)
     

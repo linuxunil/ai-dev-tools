@@ -99,7 +99,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         --sequential)
-            MODE="--mode sequential"
+            MODE="sequential"
             shift
             ;;
         --parallel)
@@ -152,7 +152,7 @@ echo "======================================================================"
 if [[ "$DRY_RUN" == true ]]; then
     echo "🔍 DRY RUN - Showing configuration without execution"
     echo ""
-    uv run python scripts/batch_benchmark.py "$BATCH_TYPE" $MODE $EXTRA_ARGS --help
+    uv run python scripts/batch_benchmark.py "$BATCH_TYPE" "$MODE" $EXTRA_ARGS --help
     echo ""
     show_configurations | grep -A 10 "$(echo $BATCH_TYPE | tr '[:lower:]' '[:upper:]')"
     exit 0
@@ -177,10 +177,10 @@ esac
 # Start appropriate containers
 if [[ -n "$CONTAINERS" ]]; then
     echo "🐳 Starting containers: $CONTAINERS"
-    docker compose up -d $BUILD_FLAG $CONTAINERS
+    podman compose up -d $BUILD_FLAG $CONTAINERS
 else
     echo "🐳 Starting all containers (extended profile)"
-    docker compose --profile extended up -d $BUILD_FLAG
+    podman compose --profile extended up -d $BUILD_FLAG
 fi
 
 echo "⏳ Waiting for containers to be ready..."
@@ -188,17 +188,15 @@ sleep 10
 
 # Check container health
 echo "🏥 Checking container health..."
-docker compose ps
+podman ps
 
 echo ""
 echo "🔥 Running batch benchmark: $BATCH_TYPE"
-echo "⚡ Command: uv run python scripts/batch_benchmark.py $BATCH_TYPE $MODE $EXTRA_ARGS"
+echo "⚡ Command: uv run python scripts/batch_benchmark.py $BATCH_TYPE "$MODE" $EXTRA_ARGS"
 echo ""
 
 # Run the batch benchmark
-uv run python scripts/batch_benchmark.py "$BATCH_TYPE" $MODE $EXTRA_ARGS
-
-echo ""
+uv run python scripts/batch_benchmark.py "$BATCH_TYPE" --mode "$MODE" $EXTRA_ARGSecho ""
 echo "✅ Batch benchmark complete!"
 echo "📊 Results saved in batch_results/ directory"
 echo "🐳 Containers still running - use 'docker compose down' to stop"
