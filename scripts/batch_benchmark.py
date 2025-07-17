@@ -42,7 +42,7 @@ class BatchConfiguration:
 class BatchRunner:
     def __init__(self, output_dir: str = "batch_results"):
         self.output_dir = Path(output_dir)
-        self.output_dir.mkdir(exist_ok=True)
+        self.output_dir.mkdir(parents=True, exist_ok=True)
         self.batch_results = []
         
     def get_predefined_batches(self) -> Dict[str, List[BatchConfiguration]]:
