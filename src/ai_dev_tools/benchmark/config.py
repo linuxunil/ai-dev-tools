@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Union
 
 import tomllib
-from pydantic import BaseModel, Field, root_validator, validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 class HardwareProfile(str, Enum):
@@ -64,7 +64,8 @@ class ModelInstance(BaseModel):
         """Get the full URL for this model instance."""
         return f"http://{self.host}:{self.port}"
 
-    @validator("name")
+    @field_validator("name")
+    @classmethod
     def validate_name(cls, v):
         if not v or not v.strip():
             raise ValueError("Model instance name cannot be empty")
@@ -121,11 +122,11 @@ class BenchmarkConfig(BaseModel):
 
     retry_attempts: int = Field(default=3, ge=1, le=10, description="Number of retry attempts for failed tasks")
 
-    @root_validator
-    def validate_profiles(cls, values):
+    @model_validator(mode='after')
+    def validate_profiles(self):
         """Ensure all profiles have valid configurations."""
-        profiles = values.get("profiles", {})
-        sample_sizes = values.get("sample_sizes", {})
+        profiles = self.profiles
+        sample_sizes = self.sample_sizes
 
         for profile in HardwareProfile:
             if profile not in profiles:
@@ -137,7 +138,7 @@ class BenchmarkConfig(BaseModel):
             if profile not in sample_sizes:
                 raise ValueError(f"Missing sample size for profile: {profile}")
 
-        return values
+        return self
 
     @classmethod
     def from_toml(cls, toml_path: Union[str, Path]) -> "BenchmarkConfig":

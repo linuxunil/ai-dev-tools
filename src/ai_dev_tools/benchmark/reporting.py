@@ -523,62 +523,62 @@ class ReportGenerator:
     def generate_performance_dashboard(self, data: Dict[str, Any]) -> str:
         """Generate a simple ASCII dashboard for performance metrics."""
         lines = []
-        
+
         lines.append("┌─────────────────────────────────────────────────────────────┐")
         lines.append("│                 Performance Dashboard                       │")
         lines.append("├─────────────────────────────────────────────────────────────┤")
-        
+
         # Overall metrics
         overall_metrics = data.get("overall_metrics", {})
         comparison_metrics = data.get("comparison_metrics", {})
-        
+
         if overall_metrics:
             success_rate = overall_metrics.get("success_rate", 0)
             avg_duration = overall_metrics.get("average_task_duration", 0)
             throughput = overall_metrics.get("throughput", 0)
-            
+
             lines.append(f"│ Success Rate:     {success_rate:.1%} {self._create_bar(success_rate, 0.8)} │")
             lines.append(f"│ Avg Duration:     {avg_duration:.2f}s                               │")
             lines.append(f"│ Throughput:       {throughput:.2f} tasks/sec                       │")
-            
+
         if comparison_metrics:
             token_reduction = comparison_metrics.get("token_reduction_percent", 0) / 100
             time_reduction = comparison_metrics.get("time_reduction_percent", 0) / 100
-            
+
             lines.append("├─────────────────────────────────────────────────────────────┤")
             lines.append("│                   Improvements                              │")
             lines.append("├─────────────────────────────────────────────────────────────┤")
             lines.append(f"│ Token Reduction:  {token_reduction:.1%} {self._create_bar(token_reduction, 0.3)} │")
             lines.append(f"│ Time Reduction:   {time_reduction:.1%} {self._create_bar(time_reduction, 0.3)} │")
-            
+
         lines.append("└─────────────────────────────────────────────────────────────┘")
-        
+
         return "\n".join(lines)
-    
+
     def _create_bar(self, value: float, threshold: float = 0.5) -> str:
         """Create a simple ASCII progress bar."""
         bar_length = 20
         filled_length = int(bar_length * min(value, 1.0))
-        
+
         if value >= threshold:
             bar_char = "█"
         else:
             bar_char = "▓"
-            
+
         bar = bar_char * filled_length + "░" * (bar_length - filled_length)
         return f"[{bar}]"
-    
+
     def generate_comparison_chart(self, comparison_data: Dict[str, Any]) -> str:
         """Generate a simple ASCII chart comparing baseline vs tools."""
         lines = []
-        
+
         lines.append("┌─────────────────────────────────────────────────────────────┐")
         lines.append("│                 Baseline vs Tools                           │")
         lines.append("├─────────────────────────────────────────────────────────────┤")
-        
+
         baseline_metrics = comparison_data.get("baseline_metrics", {})
         tools_metrics = comparison_data.get("tools_metrics", {})
-        
+
         # Compare key metrics
         metrics_to_compare = [
             ("Duration", "average_task_duration", "s", True),  # Lower is better
@@ -586,15 +586,15 @@ class ReportGenerator:
             ("Success Rate", "success_rate", "%", False),  # Higher is better
             ("Throughput", "throughput", "tasks/s", False),  # Higher is better
         ]
-        
+
         for metric_name, key, unit, lower_is_better in metrics_to_compare:
             baseline_val = baseline_metrics.get(key, 0)
             tools_val = tools_metrics.get(key, 0)
-            
+
             if key == "success_rate":
                 baseline_val *= 100
                 tools_val *= 100
-            
+
             # Create comparison visualization
             if baseline_val > 0:
                 if lower_is_better:
@@ -608,78 +608,78 @@ class ReportGenerator:
             else:
                 improvement = 0
                 winner = "Tie"
-            
+
             lines.append(f"│ {metric_name:<12} │ Baseline: {baseline_val:8.2f}{unit:<6} │ Tools: {tools_val:8.2f}{unit:<6} │")
             lines.append(f"│              │ Winner: {winner:<8} │ Improvement: {improvement:+6.1f}% │")
             lines.append("├─────────────────────────────────────────────────────────────┤")
-        
+
         lines.append("└─────────────────────────────────────────────────────────────┘")
-        
+
         return "\n".join(lines)
-    
+
     def generate_trend_analysis(self, historical_data: List[Dict[str, Any]]) -> str:
         """Generate trend analysis from historical benchmark data."""
         if len(historical_data) < 2:
             return "Insufficient data for trend analysis (need at least 2 data points)"
-        
+
         lines = []
         lines.append("📈 Trend Analysis")
         lines.append("=" * 20)
-        
+
         # Extract key metrics over time
         timestamps = []
         token_reductions = []
         time_reductions = []
         success_rates = []
-        
+
         for data in historical_data:
             comparison = data.get("comparison_metrics", {})
             overall = data.get("overall_metrics", {})
-            
+
             if comparison and overall:
                 timestamps.append(data.get("benchmark_info", {}).get("timestamp", 0))
                 token_reductions.append(comparison.get("token_reduction_percent", 0))
                 time_reductions.append(comparison.get("time_reduction_percent", 0))
                 success_rates.append(overall.get("success_rate", 0) * 100)
-        
+
         if len(timestamps) >= 2:
             # Calculate trends
             token_trend = self._calculate_trend(token_reductions)
             time_trend = self._calculate_trend(time_reductions)
             success_trend = self._calculate_trend(success_rates)
-            
+
             lines.append(f"Token Reduction Trend: {token_trend}")
             lines.append(f"Time Reduction Trend: {time_trend}")
             lines.append(f"Success Rate Trend: {success_trend}")
             lines.append("")
-            
+
             # Show latest vs first comparison
             if len(historical_data) >= 2:
                 first_data = historical_data[0]
                 latest_data = historical_data[-1]
-                
+
                 first_comparison = first_data.get("comparison_metrics", {})
                 latest_comparison = latest_data.get("comparison_metrics", {})
-                
+
                 if first_comparison and latest_comparison:
                     token_change = latest_comparison.get("token_reduction_percent", 0) - first_comparison.get("token_reduction_percent", 0)
                     time_change = latest_comparison.get("time_reduction_percent", 0) - first_comparison.get("time_reduction_percent", 0)
-                    
+
                     lines.append("📊 Change Since First Run:")
                     lines.append(f"  Token Reduction: {token_change:+.1f}% change")
                     lines.append(f"  Time Reduction: {time_change:+.1f}% change")
-        
+
         return "\n".join(lines)
-    
+
     def _calculate_trend(self, values: List[float]) -> str:
         """Calculate trend direction from a list of values."""
         if len(values) < 2:
             return "No trend data"
-        
+
         # Simple trend calculation
         start_value = values[0]
         end_value = values[-1]
-        
+
         if abs(end_value - start_value) < 0.1:
             return "Stable"
         elif end_value > start_value:

@@ -36,6 +36,7 @@ dependencies = [
     "matplotlib>=3.10.3",
     "toml>=0.10.2",
     "docker>=7.0.0",
+    "aiofiles>=24.1.0",
 ]
 
 [project.optional-dependencies]
@@ -112,5 +113,8 @@ heavy = 12
 [dependency-groups]
 dev = [
     "mypy>=1.17.0",
+    "pytest>=8.4.1",
+    "pytest-asyncio>=1.1.0",
+    "pytest-cov>=6.2.1",
     "ruff>=0.12.3",
 ]
