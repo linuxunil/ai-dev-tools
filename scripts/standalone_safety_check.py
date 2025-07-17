@@ -5,14 +5,14 @@ Standalone Safety Checker CLI - AI-optimized interface
 Demonstrates exit-code-first design for AI agents
 """
 
-import sys
-import json
 import argparse
+import json
+import sys
 import tempfile
-from pathlib import Path
-from typing import Dict, List, Union
 from dataclasses import dataclass
 from enum import Enum
+from pathlib import Path
+from typing import Dict, List, Union
 
 
 # Embedded safety checker implementation
@@ -130,7 +130,7 @@ class SafetyChecker:
 
         # Check file contents for high-risk patterns
         try:
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 content = f.read()
 
             # Check for high-risk patterns
@@ -270,9 +270,7 @@ def demo():
     print("-" * 40)
     print("# AI can make decisions using only exit codes:")
     print("import subprocess")
-    print(
-        "result = subprocess.run(['python', 'standalone_safety_check.py', 'file.nix'])"
-    )
+    print("result = subprocess.run(['python', 'standalone_safety_check.py', 'file.nix'])")
     print("risk_level = result.returncode")
     print("if risk_level <= 1:  # Safe or medium risk")
     print("    # Proceed with modifications")
@@ -281,13 +279,13 @@ def demo():
     print("    # Too risky, skip or get human approval")
     print("    pass")
 
-    print(f"\n💾 Token Efficiency:")
+    print("\n💾 Token Efficiency:")
     print("-" * 40)
     print("Silent mode (default): 0 tokens, exit code only")
     print("Compact mode: ~20-50 tokens, essential info only")
     print("Human mode: ~100-200 tokens, full explanation")
 
-    print(f"\n🎯 Exit Code Patterns:")
+    print("\n🎯 Exit Code Patterns:")
     print("-" * 40)
     print("0 = SAFE      (proceed freely)")
     print("1 = MEDIUM    (proceed with caution)")

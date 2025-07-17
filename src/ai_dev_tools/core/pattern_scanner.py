@@ -94,9 +94,7 @@ class PatternScanResult:
                 "pattern_type": self.pattern_type.value,
             }
 
-            return create_ai_optimized_result(
-                count=self.count, items=items, metadata=metadata
-            )
+            return create_ai_optimized_result(count=self.count, items=items, metadata=metadata)
         except ImportError:
             # Fallback if output_strategy not available
             return {
@@ -173,10 +171,7 @@ class PatternScanner:
         matches = [
             match
             for match in matches
-            if not (
-                Path(match.file).samefile(Path(target_file))
-                and match.line == target_line
-            )
+            if not (Path(match.file).samefile(Path(target_file)) and match.line == target_line)
         ]
 
         # Limit results
@@ -190,9 +185,7 @@ class PatternScanner:
             count=len(matches),
         )
 
-    def _extract_pattern(
-        self, file_path: str, line_number: int
-    ) -> Optional[Dict[str, Any]]:
+    def _extract_pattern(self, file_path: str, line_number: int) -> Optional[Dict[str, Any]]:
         """Extract pattern information from target location"""
         try:
             with open(file_path) as f:
@@ -205,17 +198,13 @@ class PatternScanner:
 
             return {
                 "line_content": target_line,
-                "pattern_type": self._detect_pattern_type(
-                    target_line, lines, line_number - 1
-                ),
+                "pattern_type": self._detect_pattern_type(target_line, lines, line_number - 1),
                 "context_lines": self._get_context(lines, line_number - 1, 3),
             }
         except Exception:
             return None
 
-    def _detect_pattern_type(
-        self, line: str, all_lines: List[str], line_idx: int
-    ) -> PatternType:
+    def _detect_pattern_type(self, line: str, all_lines: List[str], line_idx: int) -> PatternType:
         """Detect the type of pattern this line represents"""
         if "home.packages" in line and "mkIf" in line:
             return PatternType.MKIF_HOME_PACKAGES
@@ -230,17 +219,13 @@ class PatternScanner:
         else:
             return PatternType.GENERIC
 
-    def _get_context(
-        self, lines: List[str], line_idx: int, context_size: int
-    ) -> List[str]:
+    def _get_context(self, lines: List[str], line_idx: int, context_size: int) -> List[str]:
         """Get surrounding lines for context matching"""
         start = max(0, line_idx - context_size)
         end = min(len(lines), line_idx + context_size + 1)
         return [line.strip() for line in lines[start:end]]
 
-    def _find_similar_patterns(
-        self, target_pattern: Dict[str, Any], search_dir: str
-    ) -> List[PatternMatch]:
+    def _find_similar_patterns(self, target_pattern: Dict[str, Any], search_dir: str) -> List[PatternMatch]:
         """Find similar patterns in the search directory"""
         matches = []
         search_path = Path(search_dir)
@@ -254,9 +239,7 @@ class PatternScanner:
         matches.sort(key=lambda x: x.confidence, reverse=True)
         return matches
 
-    def _scan_file_for_patterns(
-        self, file_path: Path, target_pattern: Dict[str, Any]
-    ) -> List[PatternMatch]:
+    def _scan_file_for_patterns(self, file_path: Path, target_pattern: Dict[str, Any]) -> List[PatternMatch]:
         """Scan a single file for patterns similar to target"""
         matches = []
 
@@ -272,9 +255,7 @@ class PatternScanner:
                     continue
 
                 # Calculate similarity
-                similarity = self._calculate_similarity(
-                    target_pattern, line_stripped, lines, i
-                )
+                similarity = self._calculate_similarity(target_pattern, line_stripped, lines, i)
 
                 if similarity > 0.7:  # Threshold for "similar"
                     matches.append(
@@ -372,18 +353,11 @@ class PatternScanner:
         else:
             return self._generic_similarity(target_pattern["line_content"], line)
 
-    def _match_mkif_list_concat(
-        self, target_pattern: Dict[str, Any], line: str
-    ) -> float:
+    def _match_mkif_list_concat(self, target_pattern: Dict[str, Any], line: str) -> float:
         """Specialized matching for mkIf + list concatenation patterns"""
         target_line = target_pattern["line_content"]
 
-        if (
-            "mkIf" in target_line
-            and "mkIf" in line
-            and "++" in target_line
-            and "++" in line
-        ):
+        if "mkIf" in target_line and "mkIf" in line and "++" in target_line and "++" in line:
             return 0.9
         return 0.0
 
@@ -391,9 +365,7 @@ class PatternScanner:
         """Specialized matching for Homebrew list patterns"""
         target_line = target_pattern["line_content"]
 
-        if ("casks" in target_line or "brews" in target_line) and (
-            "casks" in line or "brews" in line
-        ):
+        if ("casks" in target_line or "brews" in target_line) and ("casks" in line or "brews" in line):
             return 0.85
         return 0.0
 
@@ -436,11 +408,7 @@ class PatternScanner:
         struct2 = get_structure(line2)
 
         # Check if structures are similar (allowing some variation)
-        return (
-            struct1 == struct2
-            or len(set(struct1) & set(struct2)) / max(len(struct1), len(struct2), 1)
-            > 0.7
-        )
+        return struct1 == struct2 or len(set(struct1) & set(struct2)) / max(len(struct1), len(struct2), 1) > 0.7
 
 
 def scan_patterns_with_exit_code(
@@ -484,9 +452,7 @@ def scan_patterns_with_exit_code(
                 pattern_enum = PatternType(pattern_type)
             except ValueError:
                 if format_output != "silent":
-                    print(
-                        f"Error: Invalid pattern type: {pattern_type}", file=sys.stderr
-                    )
+                    print(f"Error: Invalid pattern type: {pattern_type}", file=sys.stderr)
                 return 255
 
         # Create scanner and run scan
@@ -508,9 +474,7 @@ def scan_patterns_with_exit_code(
             elif format_output == "human":
                 print(f"Found {result.count} similar patterns")
                 for match in result.matches[:5]:  # Show first 5
-                    print(
-                        f"  {match.file}:{match.line} (confidence: {match.confidence})"
-                    )
+                    print(f"  {match.file}:{match.line} (confidence: {match.confidence})")
                 if result.count > 5:
                     print(f"  ... and {result.count - 5} more")
 
@@ -533,13 +497,9 @@ def main():
     )
     parser.add_argument("target_file", help="File containing target pattern")
     parser.add_argument("target_line", type=int, help="Line number of target pattern")
-    parser.add_argument(
-        "--search-dir", default=".", help="Directory to search (default: .)"
-    )
+    parser.add_argument("--search-dir", default=".", help="Directory to search (default: .)")
     parser.add_argument("--pattern-type", help="Override detected pattern type")
-    parser.add_argument(
-        "--max-results", type=int, default=254, help="Maximum results (default: 254)"
-    )
+    parser.add_argument("--max-results", type=int, default=254, help="Maximum results (default: 254)")
     parser.add_argument(
         "--format",
         choices=["silent", "compact", "json", "human"],

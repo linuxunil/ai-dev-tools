@@ -381,6 +381,4 @@ def quick_ai_decision(
     context: Optional[Dict[str, Any]] = None,
 ) -> str:
     """Convenience function for quick AI decisions"""
-    return get_ollama_client().quick_decision(
-        prompt_type, decision_prompt, exit_code, context
-    )
+    return get_ollama_client().quick_decision(prompt_type, decision_prompt, exit_code, context)

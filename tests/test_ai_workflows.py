@@ -6,10 +6,8 @@ effectively for AI decision making.
 """
 
 import subprocess
-import pytest
 import tempfile
 from pathlib import Path
-import json
 
 
 class TestAIDecisionWorkflows:
@@ -33,7 +31,7 @@ class TestAIDecisionWorkflows:
     pkgs.git
     pkgs.vim
   ];
-  
+
   programs.zsh.enable = true;
 }
 """)
@@ -98,17 +96,13 @@ class TestAIDecisionWorkflows:
         """Test AI workflow: check repository health before making changes"""
 
         # Step 1: AI checks repository health
-        repo_health = self.run_tool(
-            "ai-repo-status", "--repo-path", str(self.repo_path)
-        )
+        repo_health = self.run_tool("ai-repo-status", "--repo-path", str(self.repo_path))
 
         # Should be clean (0 syntax errors)
         assert repo_health == 0
 
         # Step 2: AI checks safety of critical file
-        critical_safety = self.run_tool(
-            "ai-safety-check", f"{self.repo_path}/configuration.nix"
-        )
+        critical_safety = self.run_tool("ai-safety-check", f"{self.repo_path}/configuration.nix")
 
         # Should be high risk (exit code 2)
         assert critical_safety == 2
@@ -118,9 +112,7 @@ class TestAIDecisionWorkflows:
         assert should_modify_critical is False
 
         # Step 4: AI checks safety of source file
-        source_safety = self.run_tool(
-            "ai-safety-check", f"{self.repo_path}/src/utils.py"
-        )
+        source_safety = self.run_tool("ai-safety-check", f"{self.repo_path}/src/utils.py")
 
         # Should be safe (exit code 0)
         assert source_safety == 0
@@ -190,9 +182,7 @@ class TestAIDecisionWorkflows:
         decisions = {}
 
         # Check repository health (0 tokens)
-        repo_status = self.run_tool(
-            "ai-repo-status", "--repo-path", str(self.repo_path)
-        )
+        repo_status = self.run_tool("ai-repo-status", "--repo-path", str(self.repo_path))
         decisions["repo_clean"] = repo_status == 0
 
         # Find patterns (0 tokens)
@@ -211,11 +201,7 @@ class TestAIDecisionWorkflows:
         decisions["risk_level"] = safety_risk
 
         # AI makes final decision using only exit codes
-        should_proceed = (
-            decisions["repo_clean"]
-            and decisions["has_patterns"]
-            and decisions["safe_to_modify"]
-        )
+        should_proceed = decisions["repo_clean"] and decisions["has_patterns"] and decisions["safe_to_modify"]
 
         # Verify AI can make informed decision with zero token cost
         assert should_proceed is True

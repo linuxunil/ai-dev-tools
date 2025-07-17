@@ -4,11 +4,11 @@ Basic tests for AI Helper core functionality
 Tests the core AIHelper class and its workflow methods
 """
 
-import pytest
+import tempfile
 from pathlib import Path
 from unittest.mock import Mock, patch
-import tempfile
-import os
+
+import pytest
 
 from src.ai_dev_tools.core.ai_helper import AIHelper, HelperWorkflowResult
 
@@ -71,9 +71,7 @@ class TestAIHelper:
         mock_validation_result.summary = "All good"
         mock_validation_result.total_files_checked = 10
 
-        mock_validator.return_value.validate_project.return_value = (
-            mock_validation_result
-        )
+        mock_validator.return_value.validate_project.return_value = mock_validation_result
 
         # Test analysis
         result = self.helper.analyze_project()
@@ -99,9 +97,7 @@ class TestAIHelper:
         mock_repo.return_value.get_repo_health.return_value = mock_repo_health
 
         # Test analysis (skip validation and context for simplicity)
-        result = self.helper.analyze_project(
-            include_validation=False, include_context=False
-        )
+        result = self.helper.analyze_project(include_validation=False, include_context=False)
 
         assert result.success is True
         assert "syntax errors" in result.summary
@@ -142,9 +138,7 @@ class TestAIHelper:
         mock_impact.return_value.analyze_file_impact.return_value = mock_impact_result
 
         # Test planning
-        result = self.helper.plan_changes(
-            target_files=["test.py", "test2.py"], change_description="Test changes"
-        )
+        result = self.helper.plan_changes(target_files=["test.py", "test2.py"], change_description="Test changes")
 
         assert result.workflow_type == "plan_changes"
         assert result.success is True
@@ -190,9 +184,7 @@ class TestAIHelper:
         mock_pattern_result.matches = [mock_match]
         mock_pattern_result.to_dict.return_value = {"count": 3}
 
-        mock_pattern.return_value.scan_for_similar_patterns.return_value = (
-            mock_pattern_result
-        )
+        mock_pattern.return_value.scan_for_similar_patterns.return_value = mock_pattern_result
 
         # Mock safety checker
         mock_safety_result = Mock()
@@ -220,9 +212,7 @@ class TestAIHelper:
         mock_pattern_result.matches = []
         mock_pattern_result.to_dict.return_value = {"count": 0}
 
-        mock_pattern.return_value.scan_for_similar_patterns.return_value = (
-            mock_pattern_result
-        )
+        mock_pattern.return_value.scan_for_similar_patterns.return_value = mock_pattern_result
 
         # Test systematic fix
         result = self.helper.systematic_fix_workflow(fixed_file="test.py", fixed_line=5)

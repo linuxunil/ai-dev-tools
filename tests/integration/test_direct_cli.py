@@ -24,7 +24,6 @@ def test_safety_cli_direct():
     test_file.write_text("{ programs.git.enable = true; }")
 
     # Import and test the CLI function
-    from ai_dev_tools.cli.safety_check import main
     from ai_dev_tools.core.safety_checker import SafetyChecker
 
     # Test the core functionality first

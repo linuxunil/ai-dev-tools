@@ -68,9 +68,7 @@ class RepoAnalyzer:
         elif is_clean and syntax_errors > 0:
             summary = f"Repository is clean but has {syntax_errors} syntax errors"
         else:
-            summary = (
-                f"Repository has uncommitted changes and {syntax_errors} syntax errors"
-            )
+            summary = f"Repository has uncommitted changes and {syntax_errors} syntax errors"
 
         return RepoHealth(
             is_clean=is_clean,

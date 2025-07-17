@@ -141,7 +141,9 @@ class BaselineSimulator:
         ai_rounds = max(1, int(scenario.typical_ai_rounds * variance_factor))
         duration = scenario.typical_duration_seconds * variance_factor
 
-        # Total tokens = (input tokens for reading files) + (output tokens from AI responses)
+        # Total tokens = (input tokens for reading files) + (
+        #     output tokens from AI responses
+        # )
         input_tokens = files_read * tokens_per_file
         output_tokens = ai_rounds * 300  # Typical AI response length
         total_tokens = input_tokens + output_tokens
@@ -190,9 +192,7 @@ class BaselineSimulator:
             },
         }
 
-    def run_baseline_suite(
-        self, project_path: str = ".", iterations: int = 5
-    ) -> Dict[str, Any]:
+    def run_baseline_suite(self, project_path: str = ".", iterations: int = 5) -> Dict[str, Any]:
         """
         Run complete baseline simulation suite for all workflow types
 
@@ -246,27 +246,17 @@ class BaselineSimulator:
         results["summary"] = {
             "total_workflows": total_workflows,
             "successful_workflows": successful_workflows,
-            "success_rate": (successful_workflows / total_workflows * 100)
-            if total_workflows > 0
-            else 0,
+            "success_rate": (successful_workflows / total_workflows * 100) if total_workflows > 0 else 0,
             "total_tokens": total_tokens,
             "total_duration": total_duration,
-            "average_tokens_per_workflow": total_tokens / total_workflows
-            if total_workflows > 0
-            else 0,
-            "average_duration_per_workflow": total_duration / total_workflows
-            if total_workflows > 0
-            else 0,
-            "overall_efficiency": total_tokens / total_duration
-            if total_duration > 0
-            else 0,
+            "average_tokens_per_workflow": total_tokens / total_workflows if total_workflows > 0 else 0,
+            "average_duration_per_workflow": total_duration / total_workflows if total_workflows > 0 else 0,
+            "overall_efficiency": total_tokens / total_duration if total_duration > 0 else 0,
         }
 
         return results
 
-    def compare_with_current(
-        self, current_metrics: Dict[str, Any], baseline_results: Dict[str, Any]
-    ) -> Dict[str, Any]:
+    def compare_with_current(self, current_metrics: Dict[str, Any], baseline_results: Dict[str, Any]) -> Dict[str, Any]:
         """
         Compare baseline simulation with current tool performance
 
@@ -326,24 +316,18 @@ class BaselineSimulator:
                 "token_reduction_percent": token_improvement,
                 "time_reduction_percent": time_improvement,
                 "efficiency_increase_percent": efficiency_improvement,
-                "success_rate_improvement": current_metrics.get("success_rate", 0)
-                - baseline_summary["success_rate"],
+                "success_rate_improvement": current_metrics.get("success_rate", 0) - baseline_summary["success_rate"],
             },
             "verdict": {
                 "more_token_efficient": token_improvement > 0,
                 "faster": time_improvement > 0,
                 "more_efficient_overall": efficiency_improvement > 0,
-                "more_reliable": current_metrics.get("success_rate", 0)
-                > baseline_summary["success_rate"],
+                "more_reliable": current_metrics.get("success_rate", 0) > baseline_summary["success_rate"],
             },
             "roi_analysis": {
-                "token_savings_per_workflow": baseline_summary[
-                    "average_tokens_per_workflow"
-                ]
+                "token_savings_per_workflow": baseline_summary["average_tokens_per_workflow"]
                 - current_metrics.get("tokens", {}).get("total_avg", 0),
-                "time_savings_per_workflow": baseline_summary[
-                    "average_duration_per_workflow"
-                ]
+                "time_savings_per_workflow": baseline_summary["average_duration_per_workflow"]
                 - current_metrics.get("execution_time", {}).get("avg", 0),
                 "estimated_cost_savings": "Significant reduction in AI API costs due to token efficiency",
             },

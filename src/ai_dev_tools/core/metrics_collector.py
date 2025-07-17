@@ -175,9 +175,7 @@ class MetricsCollector:
             self._metrics.append(metric)
 
     @contextmanager
-    def measure_workflow(
-        self, workflow_type: WorkflowType, metadata: Optional[Dict[str, Any]] = None
-    ):
+    def measure_workflow(self, workflow_type: WorkflowType, metadata: Optional[Dict[str, Any]] = None):
         """
         Context manager for measuring complete workflow execution
 
@@ -225,9 +223,7 @@ class MetricsCollector:
             with self._lock:
                 self._workflows.append(workflow_metrics)
 
-    def get_metrics_summary(
-        self, workflow_type: Optional[WorkflowType] = None
-    ) -> Dict[str, Any]:
+    def get_metrics_summary(self, workflow_type: Optional[WorkflowType] = None) -> Dict[str, Any]:
         """
         Get summary statistics for collected metrics
 
@@ -273,20 +269,13 @@ class MetricsCollector:
                 "total_consumed": sum(total_tokens),
             },
             "efficiency": {
-                "tokens_per_second": sum(w.tokens_per_second for w in workflows)
-                / len(workflows),
-                "files_per_second": sum(
-                    w.files_processed / w.execution_time
-                    for w in workflows
-                    if w.execution_time > 0
-                )
+                "tokens_per_second": sum(w.tokens_per_second for w in workflows) / len(workflows),
+                "files_per_second": sum(w.files_processed / w.execution_time for w in workflows if w.execution_time > 0)
                 / len(workflows),
             },
         }
 
-    def compare_workflows(
-        self, baseline_type: WorkflowType, comparison_type: WorkflowType
-    ) -> Dict[str, Any]:
+    def compare_workflows(self, baseline_type: WorkflowType, comparison_type: WorkflowType) -> Dict[str, Any]:
         """
         Compare performance between two workflow types
 
@@ -305,19 +294,13 @@ class MetricsCollector:
 
         # Calculate improvements
         time_improvement = (
-            (
-                baseline_summary["execution_time"]["avg"]
-                - comparison_summary["execution_time"]["avg"]
-            )
+            (baseline_summary["execution_time"]["avg"] - comparison_summary["execution_time"]["avg"])
             / baseline_summary["execution_time"]["avg"]
             * 100
         )
 
         token_improvement = (
-            (
-                baseline_summary["tokens"]["total_avg"]
-                - comparison_summary["tokens"]["total_avg"]
-            )
+            (baseline_summary["tokens"]["total_avg"] - comparison_summary["tokens"]["total_avg"])
             / baseline_summary["tokens"]["total_avg"]
             * 100
         )
@@ -338,8 +321,7 @@ class MetricsCollector:
                 "execution_time_percent": time_improvement,
                 "token_usage_percent": token_improvement,
                 "efficiency_percent": efficiency_improvement,
-                "success_rate_change": comparison_summary["success_rate"]
-                - baseline_summary["success_rate"],
+                "success_rate_change": comparison_summary["success_rate"] - baseline_summary["success_rate"],
             },
             "verdict": {
                 "faster": time_improvement > 0,

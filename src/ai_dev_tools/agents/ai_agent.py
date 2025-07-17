@@ -127,9 +127,7 @@ class AIAgent:
             exit_code = min(pattern_result.count, 254) if success else 255
 
             # Step 5: Create summary
-            summary = self._create_workflow_summary(
-                pattern_result.count, len(safe_files), len(high_risk_files)
-            )
+            summary = self._create_workflow_summary(pattern_result.count, len(safe_files), len(high_risk_files))
 
             return WorkflowResult(
                 workflow_type="fix_and_propagate",
@@ -178,15 +176,11 @@ class AIAgent:
             # Identify blocking issues
             blocking_issues = []
             if health.syntax_errors > 0:
-                blocking_issues.append(
-                    f"{health.syntax_errors} syntax errors need fixing"
-                )
+                blocking_issues.append(f"{health.syntax_errors} syntax errors need fixing")
             if health.health_score <= 0.5:
                 blocking_issues.append("Repository health score too low")
             if health.missing_files:
-                blocking_issues.append(
-                    f"Missing essential files: {', '.join(health.missing_files)}"
-                )
+                blocking_issues.append(f"Missing essential files: {', '.join(health.missing_files)}")
 
             # Generate recommendations
             recommendations = health.recommendations.copy()
@@ -249,9 +243,7 @@ class AIAgent:
 
             # Determine overall safety
             max_risk = max(risk_levels) if risk_levels else 0
-            safe_to_proceed = (
-                max_risk <= RiskLevel.MEDIUM.value and len(critical_files) == 0
-            )
+            safe_to_proceed = max_risk <= RiskLevel.MEDIUM.value and len(critical_files) == 0
 
             # Map risk level to name
             risk_level_names = {0: "safe", 1: "medium", 2: "high", 3: "critical"}
@@ -296,33 +288,21 @@ class AIAgent:
             recommendations.append(f"Apply fix to {len(safe_files)} safe files first")
 
         if high_risk_files:
-            recommendations.append(
-                f"Review {len(high_risk_files)} high-risk files manually"
-            )
-            recommendations.append(
-                "Consider creating backups before modifying critical files"
-            )
+            recommendations.append(f"Review {len(high_risk_files)} high-risk files manually")
+            recommendations.append("Consider creating backups before modifying critical files")
 
         if pattern_result.count > 10:
-            recommendations.append(
-                "Large number of patterns found - consider batch processing"
-            )
+            recommendations.append("Large number of patterns found - consider batch processing")
 
         # Pattern-specific recommendations
         if pattern_result.pattern_type.value == "mkIf_home_packages":
-            recommendations.append(
-                "Nix home-manager package pattern - verify package availability"
-            )
+            recommendations.append("Nix home-manager package pattern - verify package availability")
         elif pattern_result.pattern_type.value == "homebrew_list":
-            recommendations.append(
-                "Homebrew configuration - check package names and availability"
-            )
+            recommendations.append("Homebrew configuration - check package names and availability")
 
         return recommendations
 
-    def _create_workflow_summary(
-        self, total_patterns: int, safe_files: int, high_risk_files: int
-    ) -> str:
+    def _create_workflow_summary(self, total_patterns: int, safe_files: int, high_risk_files: int) -> str:
         """Create human-readable workflow summary"""
         if total_patterns == 0:
             return "No similar patterns found in codebase"
@@ -340,9 +320,7 @@ class AIAgent:
 
         return summary
 
-    def find_similar_patterns(
-        self, target_file: str, target_line: int, search_dir: str = "."
-    ) -> PatternScanResult:
+    def find_similar_patterns(self, target_file: str, target_line: int, search_dir: str = ".") -> PatternScanResult:
         """
         Find patterns similar to the one at target location
 
@@ -388,42 +366,26 @@ class AIAgent:
         if pattern_result.count == 0:
             recommendations.append("No similar patterns found - fix is isolated")
         elif pattern_result.count <= 5:
-            recommendations.append(
-                f"Found {pattern_result.count} similar patterns - "
-                "consider applying same fix"
-            )
+            recommendations.append(f"Found {pattern_result.count} similar patterns - consider applying same fix")
         else:
-            recommendations.append(
-                f"Found {pattern_result.count} similar patterns - batch fix recommended"
-            )
+            recommendations.append(f"Found {pattern_result.count} similar patterns - batch fix recommended")
 
         # Safety-based recommendations
-        high_risk_files = [
-            sr
-            for sr in safety_results
-            if sr["safety"]["risk_level"] >= RiskLevel.HIGH.value
-        ]
+        high_risk_files = [sr for sr in safety_results if sr["safety"]["risk_level"] >= RiskLevel.HIGH.value]
 
         if high_risk_files:
-            recommendations.append(
-                f"⚠️  {len(high_risk_files)} high-risk files found - "
-                "proceed with caution"
-            )
+            recommendations.append(f"⚠️  {len(high_risk_files)} high-risk files found - proceed with caution")
 
         return recommendations
 
-    def _generate_safety_recommendations(
-        self, results: List[Dict[str, Any]], overall_risk: RiskLevel
-    ) -> List[str]:
+    def _generate_safety_recommendations(self, results: List[Dict[str, Any]], overall_risk: RiskLevel) -> List[str]:
         """Generate safety recommendations"""
         recommendations = []
 
         if overall_risk == RiskLevel.SAFE:
             recommendations.append("✅ All files are safe to modify")
         elif overall_risk == RiskLevel.MEDIUM:
-            recommendations.append(
-                "⚠️  Medium risk - proceed with caution and test changes"
-            )
+            recommendations.append("⚠️  Medium risk - proceed with caution and test changes")
         elif overall_risk == RiskLevel.HIGH:
             recommendations.append("🚨 High risk - make backups and test thoroughly")
         else:
@@ -438,14 +400,9 @@ class AIAgent:
         if pattern_result.count == 0:
             return "Fix is isolated - no similar patterns found"
 
-        safe_count = len(
-            [sr for sr in safety_results if sr["safety"]["safe_to_modify"]]
-        )
+        safe_count = len([sr for sr in safety_results if sr["safety"]["safe_to_modify"]])
 
-        return (
-            f"Found {pattern_result.count} similar patterns, "
-            f"{safe_count} safe to modify"
-        )
+        return f"Found {pattern_result.count} similar patterns, {safe_count} safe to modify"
 
     def _identify_blocking_issues(self, health: RepoHealth) -> List[str]:
         """Identify issues that block making changes"""

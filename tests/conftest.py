@@ -2,18 +2,15 @@
 Test configuration and fixtures for BDD tests
 """
 
-import json
 import tempfile
 from pathlib import Path
-from typing import Dict, Any
 
 import pytest
-from pytest_bdd import given, when, then, parsers
 
-from ai_dev_tools.core.pattern_scanner import PatternScanner
-from ai_dev_tools.core.safety_checker import SafetyChecker
-from ai_dev_tools.core.repo_analyzer import RepoAnalyzer
 from ai_dev_tools.agents.ai_agent import AIAgent
+from ai_dev_tools.core.pattern_scanner import PatternScanner
+from ai_dev_tools.core.repo_analyzer import RepoAnalyzer
+from ai_dev_tools.core.safety_checker import SafetyChecker
 
 
 @pytest.fixture
@@ -38,11 +35,11 @@ def sample_files(temp_repo):
     pkgs.git
     pkgs.vim
   ];
-  
+
   programs.zsh.enable = true;
-  
+
   home.file.".vimrc".text = "set number";
-  
+
   environment.systemPackages = lib.mkIf config.services.docker.enable [
     pkgs.docker
     pkgs.docker-compose
@@ -60,7 +57,7 @@ def sample_files(temp_repo):
     pkgs.curl
     pkgs.wget
   ];
-  
+
   programs.bash.enable = true;
 }
 """)

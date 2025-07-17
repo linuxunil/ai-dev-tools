@@ -211,9 +211,7 @@ def check_safety(file_path: str, model: str, format: str):
     default="text",
     help="Output format",
 )
-def query(
-    prompt: str, prompt_type: str, model: str, exit_code: Optional[int], format: str
-):
+def query(prompt: str, prompt_type: str, model: str, exit_code: Optional[int], format: str):
     """Query Ollama with custom prompt"""
     client = get_ollama_client()
 
@@ -309,9 +307,7 @@ def metrics():
     click.echo(f"  Success rate: {summary['success_rate']:.1f}%")
     click.echo(f"  Average execution time: {summary['execution_time']['avg']:.2f}s")
     click.echo(f"  Average tokens per workflow: {summary['tokens']['total_avg']:.0f}")
-    click.echo(
-        f"  Token efficiency: {summary['efficiency']['tokens_per_second']:.0f} tokens/sec"
-    )
+    click.echo(f"  Token efficiency: {summary['efficiency']['tokens_per_second']:.0f} tokens/sec")
 
     # Export metrics
     export_path = collector.export_metrics()

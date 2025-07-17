@@ -72,9 +72,7 @@ class AIHelper:
         self.repo_analyzer = RepoAnalyzer()
         self.difference_analyzer = DifferenceAnalyzer()
 
-    def analyze_project(
-        self, include_validation: bool = True, include_context: bool = True
-    ) -> HelperWorkflowResult:
+    def analyze_project(self, include_validation: bool = True, include_context: bool = True) -> HelperWorkflowResult:
         """
         Comprehensive project analysis workflow
 
@@ -111,14 +109,10 @@ class AIHelper:
                     "complexity_score": context_result.complexity_score,
                     "project_type": context_result.project_type.value,
                     "framework": context_result.framework.value,
-                    "dependencies": [
-                        dep.to_dict() for dep in context_result.dependencies
-                    ],
+                    "dependencies": [dep.to_dict() for dep in context_result.dependencies],
                 }
                 # Normalize complexity score (lower is better for overall score)
-                normalized_complexity = max(
-                    0, 1.0 - (context_result.complexity_score / 100)
-                )
+                normalized_complexity = max(0, 1.0 - (context_result.complexity_score / 100))
                 overall_score += normalized_complexity * 0.3
 
             # Step 3: Validation (if requested)
@@ -145,13 +139,9 @@ class AIHelper:
 
             # Add AI-specific recommendations
             if repo_health.syntax_errors > 0:
-                recommendations.insert(
-                    0, "Fix syntax errors before AI-assisted changes"
-                )
+                recommendations.insert(0, "Fix syntax errors before AI-assisted changes")
             if overall_score < 0.6:
-                recommendations.insert(
-                    0, "Project health below recommended threshold for AI changes"
-                )
+                recommendations.insert(0, "Project health below recommended threshold for AI changes")
 
             # Step 5: Determine readiness for AI assistance
             ready_for_ai = (
@@ -160,9 +150,7 @@ class AIHelper:
                 and (not include_validation or issues_count < 20)
             )
 
-            summary = self._generate_project_summary(
-                overall_score, ready_for_ai, repo_health.syntax_errors
-            )
+            summary = self._generate_project_summary(overall_score, ready_for_ai, repo_health.syntax_errors)
 
             # Exit code: overall health score * 100 (0-100 range)
             exit_code = min(int(overall_score * 100), 254)
@@ -242,15 +230,11 @@ class AIHelper:
             # Step 2: Impact analysis (if requested)
             if assess_impact and target_files:
                 impact_analyzer = ImpactAnalyzer(Path(str(self.repo_path)))
-                impact_result = impact_analyzer.analyze_file_impact(
-                    Path(target_files[0])
-                )
+                impact_result = impact_analyzer.analyze_file_impact(Path(target_files[0]))
                 planning_results["impact"] = {
                     "affected_files": len(impact_result.impacted_files),
                     "risk_level": impact_result.overall_risk.name,
-                    "impacted_files": [
-                        f.to_dict() for f in impact_result.impacted_files
-                    ],
+                    "impacted_files": [f.to_dict() for f in impact_result.impacted_files],
                     "recommendations": impact_result.recommendations,
                 }
                 recommendations.extend(impact_result.recommendations[:2])
@@ -259,24 +243,16 @@ class AIHelper:
             if max_risk <= RiskLevel.MEDIUM.value and not critical_files:
                 recommendations.insert(0, "Changes appear safe to proceed")
             elif critical_files:
-                recommendations.insert(
-                    0, f"CAUTION: {len(critical_files)} critical files detected"
-                )
+                recommendations.insert(0, f"CAUTION: {len(critical_files)} critical files detected")
                 recommendations.append("Create backups before modifying critical files")
 
             if len(target_files) > 10:
-                recommendations.append(
-                    "Consider batch processing for large change sets"
-                )
+                recommendations.append("Consider batch processing for large change sets")
 
             # Step 4: Determine change safety
-            safe_to_proceed = (
-                max_risk <= RiskLevel.MEDIUM.value and len(critical_files) == 0
-            )
+            safe_to_proceed = max_risk <= RiskLevel.MEDIUM.value and len(critical_files) == 0
 
-            summary = self._generate_change_plan_summary(
-                len(target_files), max_risk, safe_to_proceed
-            )
+            summary = self._generate_change_plan_summary(len(target_files), max_risk, safe_to_proceed)
 
             return HelperWorkflowResult(
                 workflow_type="plan_changes",
@@ -364,10 +340,7 @@ class AIHelper:
                 }
                 safety_assessments.append(assessment)
 
-                if (
-                    safety.safe_to_modify
-                    and safety.risk_level.value <= RiskLevel.MEDIUM.value
-                ):
+                if safety.safe_to_modify and safety.risk_level.value <= RiskLevel.MEDIUM.value:
                     safe_files.append(match.file)
                 elif safety.risk_level.value >= RiskLevel.HIGH.value:
                     high_risk_files.append(match.file)
@@ -375,18 +348,17 @@ class AIHelper:
             # Step 3: Generate systematic fix recommendations
             recommendations = []
             if safe_files:
-                recommendations.append(
-                    f"Apply fix to {len(safe_files)} safe files first"
-                )
+                recommendations.append(f"Apply fix to {len(safe_files)} safe files first")
             if high_risk_files:
-                recommendations.append(
-                    f"Review {len(high_risk_files)} high-risk files manually"
-                )
+                recommendations.append(f"Review {len(high_risk_files)} high-risk files manually")
             if pattern_result.count > 20:
                 recommendations.append("Large pattern set - consider batch processing")
 
             # Step 4: Create workflow summary
-            summary = f"Found {pattern_result.count} similar patterns ({len(safe_files)} safe, {len(high_risk_files)} high-risk)"
+            summary = (
+                f"Found {pattern_result.count} similar patterns ({len(safe_files)} safe, "
+                f"{len(high_risk_files)} high-risk)"
+            )
 
             return HelperWorkflowResult(
                 workflow_type="systematic_fix",
@@ -419,9 +391,7 @@ class AIHelper:
                 details={"error": str(e)},
             )
 
-    def compare_configurations(
-        self, file1: str, file2: str, context_lines: int = 3
-    ) -> HelperWorkflowResult:
+    def compare_configurations(self, file1: str, file2: str, context_lines: int = 3) -> HelperWorkflowResult:
         """
         Configuration comparison workflow with semantic analysis
 
@@ -435,22 +405,14 @@ class AIHelper:
         """
         try:
             # Perform difference analysis
-            diff_result = self.difference_analyzer.compare_files(
-                Path(file1), Path(file2)
-            )
+            diff_result = self.difference_analyzer.compare_files(Path(file1), Path(file2))
 
             recommendations = []
             diff_count = len(diff_result.differences)
             semantic_count = 0
             if diff_count > 0:
                 recommendations.append(f"Found {diff_count} differences")
-                semantic_count = len(
-                    [
-                        d
-                        for d in diff_result.differences
-                        if d.significance.name == "MAJOR"
-                    ]
-                )
+                semantic_count = len([d for d in diff_result.differences if d.significance.name == "MAJOR"])
                 if semantic_count > 0:
                     recommendations.append(f"{semantic_count} major changes detected")
                 # Add basic recommendations
@@ -486,22 +448,16 @@ class AIHelper:
                 details={"error": str(e)},
             )
 
-    def _generate_project_summary(
-        self, overall_score: float, ready_for_ai: bool, syntax_errors: int
-    ) -> str:
+    def _generate_project_summary(self, overall_score: float, ready_for_ai: bool, syntax_errors: int) -> str:
         """Generate human-readable project analysis summary"""
         if syntax_errors > 0:
-            return (
-                f"Project has {syntax_errors} syntax errors - fix before AI assistance"
-            )
+            return f"Project has {syntax_errors} syntax errors - fix before AI assistance"
         elif ready_for_ai:
             return f"Project ready for AI assistance (health: {overall_score:.1%})"
         else:
             return f"Project needs improvement before AI assistance (health: {overall_score:.1%})"
 
-    def _generate_change_plan_summary(
-        self, file_count: int, max_risk: int, safe_to_proceed: bool
-    ) -> str:
+    def _generate_change_plan_summary(self, file_count: int, max_risk: int, safe_to_proceed: bool) -> str:
         """Generate human-readable change plan summary"""
         risk_names = {0: "safe", 1: "medium", 2: "high", 3: "critical"}
         risk_name = risk_names.get(max_risk, "unknown")

@@ -27,9 +27,7 @@ from ..core.pattern_scanner import PatternScanner, PatternType
     help="Override pattern type",
 )
 @click.option("--max-results", default=255, help="Maximum number of results")
-def main(
-    target: str, search_dir: str, format: str, pattern_type: str, max_results: int
-):
+def main(target: str, search_dir: str, format: str, pattern_type: str, max_results: int):
     """
     Find similar code patterns using structural analysis
 

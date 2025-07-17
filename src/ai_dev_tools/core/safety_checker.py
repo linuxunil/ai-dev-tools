@@ -126,9 +126,7 @@ class SafetyChecker:
             )
 
         # Analyze file for risk factors
-        risk_level, reasons, recommendations = self._analyze_file_content(
-            file_path_obj, content, lines
-        )
+        risk_level, reasons, recommendations = self._analyze_file_content(file_path_obj, content, lines)
 
         return SafetyResult(
             risk_level=risk_level,
@@ -160,10 +158,7 @@ class SafetyChecker:
             risk_level = RiskLevel.SAFE
 
         # Check file extension for medium risk
-        if (
-            file_path_obj.suffix in self.medium_risk_extensions
-            and risk_level == RiskLevel.SAFE
-        ):
+        if file_path_obj.suffix in self.medium_risk_extensions and risk_level == RiskLevel.SAFE:
             risk_level = RiskLevel.MEDIUM
             reasons.append(f"⚠️ Configuration file: {file_path_obj.suffix}")
 

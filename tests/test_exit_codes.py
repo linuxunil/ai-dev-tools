@@ -6,12 +6,10 @@ for AI agent decision making.
 """
 
 import subprocess
-import pytest
-from pathlib import Path
 import tempfile
-import json
+from pathlib import Path
 
-from src.ai_dev_tools.core.exit_codes import ExitCodeEncoder, ExitCodeDecoder
+from src.ai_dev_tools.core.exit_codes import ExitCodeDecoder, ExitCodeEncoder
 
 
 class TestExitCodeEncoding:
@@ -117,7 +115,7 @@ class TestCLIExitCodes:
 """,
         )
 
-        core_nix = self.create_test_file(
+        self.create_test_file(
             "core.nix",
             """
 { config, lib, pkgs, ... }:

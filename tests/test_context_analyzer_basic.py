@@ -2,17 +2,16 @@
 Basic tests for ContextAnalyzer functionality
 """
 
-import pytest
-import tempfile
 import json
+import tempfile
 from pathlib import Path
+
+import pytest
 
 from ai_dev_tools.core.context_analyzer import (
     ContextAnalyzer,
-    ProjectType,
     FrameworkType,
-    DependencyInfo,
-    ProjectContext,
+    ProjectType,
 )
 
 
@@ -61,9 +60,7 @@ fastapi = "^0.68.0"
                 "devDependencies": {"jest": "^29.0.0"},
             }
             (project_path / "package.json").write_text(json.dumps(package_json))
-            (project_path / "index.js").write_text(
-                "const express = require('express');"
-            )
+            (project_path / "index.js").write_text("const express = require('express');")
             (project_path / "src").mkdir()
             (project_path / "src" / "App.js").write_text("import React from 'react';")
 
@@ -90,9 +87,7 @@ fastapi = "^0.68.0"
   inputs.nixpkgs.url = "github:NixOS/nixpkgs";
 }
 """)
-            (project_path / "shell.nix").write_text(
-                "{ pkgs ? import <nixpkgs> {} }: pkgs.mkShell {}"
-            )
+            (project_path / "shell.nix").write_text("{ pkgs ? import <nixpkgs> {} }: pkgs.mkShell {}")
             (project_path / "default.nix").write_text("{ pkgs }: pkgs.hello")
 
             analyzer = ContextAnalyzer(project_path)
@@ -133,15 +128,11 @@ fastapi = "^0.68.0"
             simple_complexity = context.complexity_score
 
             # Add more complexity
-            (project_path / "requirements.txt").write_text(
-                "requests\nclick\nnumpy\npandas\ndjango"
-            )
+            (project_path / "requirements.txt").write_text("requests\nclick\nnumpy\npandas\ndjango")
             (project_path / "src").mkdir()
             (project_path / "src" / "deep").mkdir()
             (project_path / "src" / "deep" / "nested").mkdir()
-            (project_path / "src" / "deep" / "nested" / "file.py").write_text(
-                "# Deep file"
-            )
+            (project_path / "src" / "deep" / "nested" / "file.py").write_text("# Deep file")
 
             for i in range(20):
                 (project_path / f"file_{i}.py").write_text(f"# File {i}")
@@ -177,9 +168,7 @@ pandas
             assert "pandas" in dep_names
 
             # Check version parsing
-            requests_dep = next(
-                dep for dep in context.dependencies if dep.name == "requests"
-            )
+            requests_dep = next(dep for dep in context.dependencies if dep.name == "requests")
             assert requests_dep.version == ">=2.25.0"
 
     def test_entry_point_detection(self):

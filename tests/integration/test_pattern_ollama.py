@@ -4,7 +4,6 @@ Test Pattern Scanner with Ollama integration
 """
 
 import subprocess
-import sys
 
 
 def test_pattern_scanner_with_ollama():
@@ -40,13 +39,13 @@ def test_pattern_scanner_with_ollama():
     # Test with Ollama
     prompt = f"""
     A pattern scanner found {pattern_count} similar code patterns.
-    
+
     Pattern counts mean:
     - 0: No similar patterns
     - 1-10: Few patterns (manual review)
     - 11-100: Some patterns (systematic fix possible)
     - 100+: Many patterns (excellent for automation)
-    
+
     What action should be taken? Answer in one word: MANUAL, REVIEW, AUTOFIX, or SKIP.
     """
 
@@ -80,13 +79,11 @@ def test_pattern_scanner_with_ollama():
     print(f"📊 Import pattern count: {import_count}")
 
     print("\n✅ Pattern Scanner tests completed!")
-    print(f"🎯 Key Benefits:")
-    print(f"  • Zero-token pattern counting via exit codes")
-    print(f"  • AI can make decisions using only exit codes")
-    print(
-        f"  • Found {pattern_count} function patterns and {import_count} import patterns"
-    )
-    print(f"  • Sub-second execution for rapid feedback")
+    print("🎯 Key Benefits:")
+    print("  • Zero-token pattern counting via exit codes")
+    print("  • AI can make decisions using only exit codes")
+    print(f"  • Found {pattern_count} function patterns and {import_count} import patterns")
+    print("  • Sub-second execution for rapid feedback")
 
 
 if __name__ == "__main__":

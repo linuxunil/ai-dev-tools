@@ -7,7 +7,6 @@ by using only exit codes for decision making.
 """
 
 import subprocess
-import sys
 import time
 from pathlib import Path
 
@@ -52,7 +51,7 @@ def test_with_ollama(file_path: str) -> None:
     prompt = f"""
     A safety tool returned exit code {exit_code} for a file.
     Exit codes mean: 0=SAFE, 1=MEDIUM, 2=HIGH, 3=CRITICAL risk.
-    
+
     What action should be taken? Answer in one word: PROCEED, REVIEW, APPROVE, or BLOCK.
     """
 

@@ -5,7 +5,6 @@ Critical tests to ensure exit codes work correctly for AI consumption.
 This is the core of our AI-first design.
 """
 
-import pytest
 import subprocess
 import tempfile
 from pathlib import Path
@@ -23,16 +22,12 @@ class TestExitCodeValidation:
         """Test pattern scanner returns count as exit code"""
         # Create target file
         target_file = self.test_path / "target.nix"
-        target_file.write_text(
-            "mkIf config.programs.git.enable home.packages = with pkgs; [ git ];"
-        )
+        target_file.write_text("mkIf config.programs.git.enable home.packages = with pkgs; [ git ];")
 
         # Create similar files
         for i in range(3):
             similar_file = self.test_path / f"similar_{i}.nix"
-            similar_file.write_text(
-                f"mkIf config.programs.test{i}.enable home.packages = with pkgs; [ test{i} ];"
-            )
+            similar_file.write_text(f"mkIf config.programs.test{i}.enable home.packages = with pkgs; [ test{i} ];")
 
         # Test via CLI
         result = subprocess.run(
@@ -173,12 +168,8 @@ class TestExitCodeValidation:
         ]
 
         for tool_args in tools_and_args:
-            result = subprocess.run(
-                tool_args, capture_output=True, cwd="/Users/disco/projects/ai-dev-tools"
-            )
-            assert 0 <= result.returncode <= 255, (
-                f"Invalid exit code {result.returncode} for {tool_args[0]}"
-            )
+            result = subprocess.run(tool_args, capture_output=True, cwd="/Users/disco/projects/ai-dev-tools")
+            assert 0 <= result.returncode <= 255, f"Invalid exit code {result.returncode} for {tool_args[0]}"
 
     def test_silent_mode_no_output(self):
         """Test that silent mode produces no output (token efficiency)"""
@@ -194,10 +185,6 @@ class TestExitCodeValidation:
         ]
 
         for tool_args in tools_and_args:
-            result = subprocess.run(
-                tool_args, capture_output=True, cwd="/Users/disco/projects/ai-dev-tools"
-            )
+            result = subprocess.run(tool_args, capture_output=True, cwd="/Users/disco/projects/ai-dev-tools")
             # Silent mode should produce no stdout output
-            assert result.stdout == b"", (
-                f"Tool {tool_args[0]} produced output in silent mode: {result.stdout}"
-            )
+            assert result.stdout == b"", f"Tool {tool_args[0]} produced output in silent mode: {result.stdout}"

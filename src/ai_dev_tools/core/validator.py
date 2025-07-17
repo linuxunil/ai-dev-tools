@@ -63,8 +63,7 @@ class ValidationResult:
             "is_valid": self.is_valid,
             "total_issues": len(self.issues),
             "issues_by_level": {
-                level.name: len([i for i in self.issues if i.level == level])
-                for level in ValidationLevel
+                level.name: len([i for i in self.issues if i.level == level]) for level in ValidationLevel
             },
             "issues": [issue.to_dict() for issue in self.issues],
             "summary": self.summary,
@@ -134,10 +133,7 @@ class ProjectValidator:
             self._validate_security()
 
         # Determine if project is valid (no errors or critical issues)
-        is_valid = not any(
-            issue.level in [ValidationLevel.ERROR, ValidationLevel.CRITICAL]
-            for issue in self.issues
-        )
+        is_valid = not any(issue.level in [ValidationLevel.ERROR, ValidationLevel.CRITICAL] for issue in self.issues)
 
         summary = self._generate_summary()
 
@@ -222,9 +218,7 @@ class ProjectValidator:
                 )
 
         # Check for Python project structure
-        if (self.project_path / "pyproject.toml").exists() or (
-            self.project_path / "setup.py"
-        ).exists():
+        if (self.project_path / "pyproject.toml").exists() or (self.project_path / "setup.py").exists():
             self._validate_python_structure()
 
         # Check for JavaScript/Node.js project
@@ -359,9 +353,7 @@ class ProjectValidator:
                 line = line.strip()
                 if line and not line.startswith("#"):
                     # Basic validation of requirement format
-                    if not re.match(
-                        r"^[a-zA-Z0-9_-]+([><=!]+[0-9.]+)?$", line.split()[0]
-                    ):
+                    if not re.match(r"^[a-zA-Z0-9_-]+([><=!]+[0-9.]+)?$", line.split()[0]):
                         self.issues.append(
                             ValidationIssue(
                                 level=ValidationLevel.WARNING,
@@ -403,9 +395,7 @@ class ProjectValidator:
                     )
 
             # Check if node_modules exists but package-lock.json doesn't
-            if (self.project_path / "node_modules").exists() and not (
-                self.project_path / "package-lock.json"
-            ).exists():
+            if (self.project_path / "node_modules").exists() and not (self.project_path / "package-lock.json").exists():
                 self.issues.append(
                     ValidationIssue(
                         level=ValidationLevel.WARNING,

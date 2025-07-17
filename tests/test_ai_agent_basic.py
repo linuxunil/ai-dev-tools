@@ -4,7 +4,6 @@ Basic AI Agent Tests
 Tests core AI Agent functionality to ensure workflows work correctly.
 """
 
-import pytest
 import tempfile
 from pathlib import Path
 
@@ -45,15 +44,11 @@ class TestAIAgentBasic:
         """Test workflow finds and assesses similar patterns"""
         # Create target file
         target_file = self.test_path / "target.nix"
-        target_file.write_text(
-            "mkIf config.programs.git.enable home.packages = with pkgs; [ git ];"
-        )
+        target_file.write_text("mkIf config.programs.git.enable home.packages = with pkgs; [ git ];")
 
         # Create similar file
         similar_file = self.test_path / "similar.nix"
-        similar_file.write_text(
-            "mkIf config.programs.vim.enable home.packages = with pkgs; [ vim ];"
-        )
+        similar_file.write_text("mkIf config.programs.vim.enable home.packages = with pkgs; [ vim ];")
 
         result = self.agent.fix_and_propagate_workflow(
             fixed_file=str(target_file), fixed_line=1, search_scope=str(self.test_path)
@@ -111,9 +106,7 @@ class TestAIAgentBasic:
         test_file.write_text("test content")
 
         # Test fix_and_propagate workflow
-        result = self.agent.fix_and_propagate_workflow(
-            fixed_file=str(test_file), fixed_line=1
-        )
+        result = self.agent.fix_and_propagate_workflow(fixed_file=str(test_file), fixed_line=1)
         assert 0 <= result.exit_code <= 255
 
         # Test repository context
@@ -127,9 +120,7 @@ class TestAIAgentBasic:
     def test_error_handling(self):
         """Test error handling in workflows"""
         # Test with invalid file path
-        result = self.agent.fix_and_propagate_workflow(
-            fixed_file="/nonexistent/path.nix", fixed_line=1
-        )
+        result = self.agent.fix_and_propagate_workflow(fixed_file="/nonexistent/path.nix", fixed_line=1)
 
         assert not result.success
         assert result.exit_code == 255

@@ -5,20 +5,19 @@ Tests the core metrics collection, baseline simulation, and benchmarking
 functionality for measuring token usage and execution time improvements.
 """
 
-import pytest
-import tempfile
 import shutil
+import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch
 
+import pytest
+
+from src.ai_dev_tools.core.baseline_simulator import BaselineSimulator
 from src.ai_dev_tools.core.metrics_collector import (
     MetricsCollector,
-    WorkflowType,
     MetricType,
     WorkflowMetrics,
-    MetricPoint,
+    WorkflowType,
 )
-from src.ai_dev_tools.core.baseline_simulator import BaselineSimulator
 
 
 class TestMetricsCollector:
@@ -57,9 +56,7 @@ class TestMetricsCollector:
 
     def test_measure_workflow_success(self):
         """Test successful workflow measurement"""
-        with self.collector.measure_workflow(
-            WorkflowType.PATTERN_ANALYSIS, {"test": "metadata"}
-        ) as context:
+        with self.collector.measure_workflow(WorkflowType.PATTERN_ANALYSIS, {"test": "metadata"}) as context:
             context.record_tokens(50, 25)
             context.record_files_processed(5)
             context.add_metadata("result", "success")
@@ -78,9 +75,7 @@ class TestMetricsCollector:
     def test_measure_workflow_failure(self):
         """Test workflow measurement with exception"""
         with pytest.raises(ValueError):
-            with self.collector.measure_workflow(
-                WorkflowType.PATTERN_ANALYSIS
-            ) as context:
+            with self.collector.measure_workflow(WorkflowType.PATTERN_ANALYSIS) as context:
                 context.record_tokens(50, 25)
                 raise ValueError("Test error")
 
@@ -118,9 +113,7 @@ class TestMetricsCollector:
             context.record_tokens(100, 50)  # Low token usage
             context.record_files_processed(5)
 
-        comparison = self.collector.compare_workflows(
-            WorkflowType.BASELINE_MANUAL, WorkflowType.PATTERN_ANALYSIS
-        )
+        comparison = self.collector.compare_workflows(WorkflowType.BASELINE_MANUAL, WorkflowType.PATTERN_ANALYSIS)
 
         assert "improvements" in comparison
         assert comparison["verdict"]["more_token_efficient"] is True
@@ -128,9 +121,7 @@ class TestMetricsCollector:
     def test_export_metrics(self):
         """Test metrics export"""
         # Add some test data
-        self.collector.record_metric(
-            WorkflowType.PATTERN_ANALYSIS, MetricType.TOKEN_INPUT, 100.0
-        )
+        self.collector.record_metric(WorkflowType.PATTERN_ANALYSIS, MetricType.TOKEN_INPUT, 100.0)
 
         export_path = self.collector.export_metrics("test_export.json")
 
@@ -140,7 +131,7 @@ class TestMetricsCollector:
         # Verify export content
         import json
 
-        with open(export_path, "r") as f:
+        with open(export_path) as f:
             data = json.load(f)
 
         assert "export_timestamp" in data
@@ -150,9 +141,7 @@ class TestMetricsCollector:
     def test_clear_metrics(self):
         """Test clearing metrics"""
         # Add some data
-        self.collector.record_metric(
-            WorkflowType.PATTERN_ANALYSIS, MetricType.TOKEN_INPUT, 100.0
-        )
+        self.collector.record_metric(WorkflowType.PATTERN_ANALYSIS, MetricType.TOKEN_INPUT, 100.0)
 
         assert len(self.collector._metrics) == 1
 
@@ -235,9 +224,7 @@ class TestBaselineSimulator:
             "success_rate": 95.0,
         }
 
-        comparison = self.simulator.compare_with_current(
-            current_metrics, baseline_results
-        )
+        comparison = self.simulator.compare_with_current(current_metrics, baseline_results)
 
         assert "baseline" in comparison
         assert "current" in comparison

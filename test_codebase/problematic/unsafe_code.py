@@ -3,8 +3,8 @@ Problematic code with known safety and quality issues
 """
 
 import os
-import subprocess
 import pickle
+import subprocess
 
 
 # Security issue: Command injection vulnerability
@@ -34,7 +34,7 @@ def divide_unsafe(a, b):
 # Quality issue: Resource leak
 def read_file_unsafe(filename):
     """Read file without proper cleanup"""
-    f = open(filename, "r")  # File handle leak
+    f = open(filename)  # File handle leak
     return f.read()
 
 

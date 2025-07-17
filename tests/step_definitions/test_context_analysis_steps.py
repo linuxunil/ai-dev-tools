@@ -3,15 +3,14 @@ BDD step definitions for context analysis feature
 """
 
 import json
-import tempfile
 import subprocess
+import tempfile
 from pathlib import Path
-from pytest_bdd import given, when, then, scenarios, parsers
+
+from pytest_bdd import given, parsers, scenarios, then, when
 
 from ai_dev_tools.core.context_analyzer import (
     ContextAnalyzer,
-    ProjectType,
-    FrameworkType,
 )
 
 # Load scenarios from feature file

@@ -65,7 +65,8 @@ def main(target_file: str, project_path: str, format: str, max_files: int):
             click.echo(f"Max Severity: {analysis.max_severity.value}")
             if analysis.total_impacted_files > 0:
                 click.echo(
-                    f"Types: {', '.join(set(f.impact_type.value for f in analysis.impacted_files))}"
+                    f"Types: {', '.join(set(f.impact_type.value for f in analysis.impacted_files))} "
+                    "(showing first {max_files} files)"
                 )
         elif format == "human":
             click.echo(f"Impact Analysis for: {analysis.target_file}")
@@ -86,9 +87,7 @@ def main(target_file: str, project_path: str, format: str, max_files: int):
                     }.get(impact_file.severity.value, "?")
 
                     click.echo(f"    {severity_marker} {impact_file.path}")
-                    click.echo(
-                        f"      {impact_file.impact_type.value}: {impact_file.reason}"
-                    )
+                    click.echo(f"      {impact_file.impact_type.value}: {impact_file.reason}")
 
                 if len(analysis.impacted_files) > 10:
                     remaining = len(analysis.impacted_files) - 10

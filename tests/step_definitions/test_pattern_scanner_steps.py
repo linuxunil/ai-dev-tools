@@ -4,11 +4,10 @@ Step definitions for Pattern Scanner BDD tests
 
 import json
 import subprocess
-from pathlib import Path
 
-from pytest_bdd import scenarios, given, when, then, parsers
+from pytest_bdd import given, parsers, scenarios, then, when
 
-from ai_dev_tools.core.pattern_scanner import PatternScanner, PatternType
+from ai_dev_tools.core.pattern_scanner import PatternType
 
 # Load scenarios
 scenarios("../features/pattern_scanner.feature")
@@ -33,9 +32,7 @@ def file_with_mkif_pattern(sample_files, filename, line, test_context):
     test_context["target_line"] = line
 
 
-@given(
-    parsers.parse('I have a file "{filename}" with a unique pattern at line {line:d}')
-)
+@given(parsers.parse('I have a file "{filename}" with a unique pattern at line {line:d}'))
 def file_with_unique_pattern(sample_files, filename, line, test_context):
     """Set up file with unique pattern"""
     test_context["target_file"] = str(sample_files[filename])
@@ -54,9 +51,7 @@ def three_files_with_mkif(sample_files, test_context):
     """Set up scenario with 3 similar patterns"""
     test_context["target_file"] = str(sample_files["shell.nix"])
     test_context["target_line"] = 3
-    test_context["expected_count"] = (
-        2  # shell.nix + core.nix (development.nix has different pattern)
-    )
+    test_context["expected_count"] = 2  # shell.nix + core.nix (development.nix has different pattern)
 
 
 @given(parsers.parse('I provide an invalid target format "{target}"'))

@@ -148,9 +148,7 @@ def create_exit_code_result(
 
     # Only include metadata if it's essential
     if metadata:
-        essential_meta = {
-            k: v for k, v in metadata.items() if v is not None and v != "" and v != []
-        }
+        essential_meta = {k: v for k, v in metadata.items() if v is not None and v != "" and v != []}
         if essential_meta:
             result["meta"] = essential_meta
 

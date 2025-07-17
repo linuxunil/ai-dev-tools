@@ -89,9 +89,7 @@ def analyze(ctx, format: Optional[str], skip_validation: bool, skip_context: boo
     """
     helper: AIHelper = ctx.obj["helper"]
 
-    result = helper.analyze_project(
-        include_validation=not skip_validation, include_context=not skip_context
-    )
+    result = helper.analyze_project(include_validation=not skip_validation, include_context=not skip_context)
 
     if format:
         click.echo(format_output(result, format))
@@ -118,9 +116,7 @@ def analyze(ctx, format: Optional[str], skip_validation: bool, skip_context: boo
     help="Skip impact analysis for faster planning",
 )
 @click.pass_context
-def plan(
-    ctx, files: List[str], format: Optional[str], description: str, skip_impact: bool
-):
+def plan(ctx, files: List[str], format: Optional[str], description: str, skip_impact: bool):
     """
     Change planning workflow with impact analysis and safety assessment
 
@@ -224,9 +220,7 @@ def compare(ctx, file1: str, file2: str, format: Optional[str], context_lines: i
     """
     helper: AIHelper = ctx.obj["helper"]
 
-    result = helper.compare_configurations(
-        file1=file1, file2=file2, context_lines=context_lines
-    )
+    result = helper.compare_configurations(file1=file1, file2=file2, context_lines=context_lines)
 
     if format:
         click.echo(format_output(result, format))

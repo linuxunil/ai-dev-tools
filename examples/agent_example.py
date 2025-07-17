@@ -13,7 +13,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from ai_dev_tools.agents import AIAgent
-from ai_dev_tools.core import PatternScanner, SafetyChecker, RepoAnalyzer
+from ai_dev_tools.core import PatternScanner, RepoAnalyzer, SafetyChecker
 
 
 def demonstrate_agent_workflow():
@@ -85,14 +85,14 @@ def demonstrate_individual_libraries():
     # Pattern Scanner
     print("\n1. Pattern Scanner")
     print("-" * 20)
-    scanner = PatternScanner()
+    PatternScanner()
     print("PatternScanner initialized")
     print("Usage: scanner.scan_for_similar_patterns(file, line, search_dir)")
 
     # Safety Checker
     print("\n2. Safety Checker")
     print("-" * 20)
-    checker = SafetyChecker()
+    SafetyChecker()
     print("SafetyChecker initialized")
     print("Usage: checker.check_file_safety(file_path)")
 
@@ -153,6 +153,4 @@ if __name__ == "__main__":
 
     except Exception as e:
         print(f"Error: {e}")
-        print(
-            "This is a demonstration - some features may not work without actual files."
-        )
+        print("This is a demonstration - some features may not work without actual files.")

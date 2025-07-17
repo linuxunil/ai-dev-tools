@@ -23,7 +23,7 @@ from ..core.safety_checker import SafetyChecker
 def main(file_path: str, format: str):
     """
     Check if a file is safe to modify
-    
+
     Args:
         file_path: File to check for safety
 

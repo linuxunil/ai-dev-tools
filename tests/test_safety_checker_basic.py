@@ -4,11 +4,10 @@ Basic Safety Checker Tests
 Tests core safety checking functionality to ensure it works correctly.
 """
 
-import pytest
 import tempfile
 from pathlib import Path
 
-from src.ai_dev_tools.core.safety_checker import SafetyChecker, RiskLevel
+from src.ai_dev_tools.core.safety_checker import RiskLevel, SafetyChecker
 
 
 class TestSafetyCheckerBasic:

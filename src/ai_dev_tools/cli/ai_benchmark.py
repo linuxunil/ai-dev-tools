@@ -45,54 +45,30 @@ def format_benchmark_output(results: Dict[str, Any], format_type: str) -> str:
             verdict = comp.get("verdict", {})
 
             output.append("\n📊 Performance Comparison:")
-            output.append(
-                f"Token Efficiency: {improvements.get('token_reduction_percent', 0):.1f}% improvement"
-            )
-            output.append(
-                f"Execution Speed: {improvements.get('time_reduction_percent', 0):.1f}% improvement"
-            )
-            output.append(
-                f"Overall Efficiency: {improvements.get('efficiency_increase_percent', 0):.1f}% improvement"
-            )
-            output.append(
-                f"Success Rate: {improvements.get('success_rate_improvement', 0):.1f}% improvement"
-            )
+            output.append(f"Token Efficiency: {improvements.get('token_reduction_percent', 0):.1f}% improvement")
+            output.append(f"Execution Speed: {improvements.get('time_reduction_percent', 0):.1f}% improvement")
+            output.append(f"Overall Efficiency: {improvements.get('efficiency_increase_percent', 0):.1f}% improvement")
+            output.append(f"Success Rate: {improvements.get('success_rate_improvement', 0):.1f}% improvement")
 
             output.append("\n✅ Verdict:")
-            output.append(
-                f"More Token Efficient: {'Yes' if verdict.get('more_token_efficient') else 'No'}"
-            )
-            output.append(
-                f"Faster Execution: {'Yes' if verdict.get('faster') else 'No'}"
-            )
-            output.append(
-                f"More Reliable: {'Yes' if verdict.get('more_reliable') else 'No'}"
-            )
+            output.append(f"More Token Efficient: {'Yes' if verdict.get('more_token_efficient') else 'No'}")
+            output.append(f"Faster Execution: {'Yes' if verdict.get('faster') else 'No'}")
+            output.append(f"More Reliable: {'Yes' if verdict.get('more_reliable') else 'No'}")
 
             if "roi_analysis" in comp:
                 roi = comp["roi_analysis"]
                 output.append("\n💰 ROI Analysis:")
-                output.append(
-                    f"Token Savings per Workflow: {roi.get('token_savings_per_workflow', 0):.0f}"
-                )
-                output.append(
-                    f"Time Savings per Workflow: {roi.get('time_savings_per_workflow', 0):.1f}s"
-                )
-                output.append(
-                    f"Cost Impact: {roi.get('estimated_cost_savings', 'N/A')}"
-                )
+                output.append(f"Token Savings per Workflow: {roi.get('token_savings_per_workflow', 0):.0f}")
+                output.append(f"Time Savings per Workflow: {roi.get('time_savings_per_workflow', 0):.1f}s")
+                output.append(f"Cost Impact: {roi.get('estimated_cost_savings', 'N/A')}")
 
         if "summary" in results:
             summary = results["summary"]
             output.append("\n📈 Summary Statistics:")
             output.append(f"Total Workflows: {summary.get('total_workflows', 0)}")
             output.append(f"Success Rate: {summary.get('success_rate', 0):.1f}%")
-            output.append(
-                f"Average Tokens: {summary.get('average_tokens_per_workflow', 0):.0f}"
-            )
-            output.append(
-                f"Average Duration: {summary.get('average_duration_per_workflow', 0):.1f}s"
-            )
+            output.append(f"Average Tokens: {summary.get('average_tokens_per_workflow', 0):.0f}")
+            output.append(f"Average Duration: {summary.get('average_duration_per_workflow', 0):.1f}s")
 
         return "\n".join(output)
 
@@ -124,9 +100,7 @@ def ai_benchmark(ctx, metrics_dir: str):
 @ai_benchmark.command()
 @click.option(
     "--workflow",
-    type=click.Choice(
-        [wt.value for wt in WorkflowType if wt != WorkflowType.BASELINE_MANUAL]
-    ),
+    type=click.Choice([wt.value for wt in WorkflowType if wt != WorkflowType.BASELINE_MANUAL]),
     help="Specific workflow type to benchmark",
 )
 @click.option(
@@ -183,9 +157,7 @@ def baseline(ctx, workflow: Optional[str], iterations: int, format: str):
 @ai_benchmark.command()
 @click.option(
     "--workflow",
-    type=click.Choice(
-        [wt.value for wt in WorkflowType if wt != WorkflowType.BASELINE_MANUAL]
-    ),
+    type=click.Choice([wt.value for wt in WorkflowType if wt != WorkflowType.BASELINE_MANUAL]),
     help="Specific workflow type to benchmark",
 )
 @click.option(
@@ -216,13 +188,9 @@ def current(ctx, workflow: Optional[str], project_path: str, format: str):
             # Run specific workflow with metrics collection
             if workflow_type == WorkflowType.PROJECT_ANALYSIS:
                 helper = AIHelper(project_path)
-                with collector.measure_workflow(
-                    WorkflowType.UNIFIED_WORKFLOW
-                ) as context:
+                with collector.measure_workflow(WorkflowType.UNIFIED_WORKFLOW) as context:
                     result = helper.analyze_project()
-                    context.record_tokens(
-                        50, 200
-                    )  # Estimated tokens for exit code workflow
+                    context.record_tokens(50, 200)  # Estimated tokens for exit code workflow
                     context.record_files_processed(10)  # Estimated files processed
                     context.add_metadata("tool_result", result.to_dict())
 
@@ -314,9 +282,7 @@ def compare(
             current_results = collector.get_metrics_summary()
 
         # Perform comparison
-        comparison = simulator.compare_with_current(
-            current_results, {"summary": baseline_results}
-        )
+        comparison = simulator.compare_with_current(current_results, {"summary": baseline_results})
 
         output_results = {
             "comparison": comparison,
@@ -438,9 +404,7 @@ def regression_test(ctx, threshold: float, baseline_file: str, project_path: str
 
         # Compare performance
         simulator = BaselineSimulator()
-        comparison = simulator.compare_with_current(
-            current_results, baseline_data.get("summary", baseline_data)
-        )
+        comparison = simulator.compare_with_current(current_results, baseline_data.get("summary", baseline_data))
 
         improvements = comparison.get("improvements", {})
 
@@ -454,20 +418,12 @@ def regression_test(ctx, threshold: float, baseline_file: str, project_path: str
                 f"Token efficiency change: {improvements.get('token_reduction_percent', 0):.1f}%",
                 err=True,
             )
-            click.echo(
-                f"Time efficiency change: {improvements.get('time_reduction_percent', 0):.1f}%",
-                err=True,
-            )
             click.echo(f"Threshold: {threshold}%", err=True)
             sys.exit(1)
         else:
             click.echo("✅ No performance regression detected")
-            click.echo(
-                f"Token efficiency: {improvements.get('token_reduction_percent', 0):.1f}%"
-            )
-            click.echo(
-                f"Time efficiency: {improvements.get('time_reduction_percent', 0):.1f}%"
-            )
+            click.echo(f"Token efficiency: {improvements.get('token_reduction_percent', 0):.1f}%")
+            click.echo(f"Time efficiency: {improvements.get('time_reduction_percent', 0):.1f}%")
             sys.exit(0)
 
     except Exception as e:
@@ -482,13 +438,13 @@ def regression_test(ctx, threshold: float, baseline_file: str, project_path: str
     help="Comma-separated list of models to test (default: small,medium)",
 )
 @click.option(
-    "--ollama-hosts", 
+    "--ollama-hosts",
     default="localhost:11434",
     help="Comma-separated list of Ollama hosts (default: localhost:11434)",
 )
 @click.option(
     "--test-codebase",
-    default="test_codebase", 
+    default="test_codebase",
     help="Path to standardized test codebase (default: test_codebase)",
 )
 @click.option(
@@ -502,16 +458,22 @@ def regression_test(ctx, threshold: float, baseline_file: str, project_path: str
     help="Output format",
 )
 @click.pass_context
-def standardized(ctx, models: str, ollama_hosts: str, test_codebase: str, 
-                output_file: Optional[str], format: str):
+def standardized(
+    ctx,
+    models: str,
+    ollama_hosts: str,
+    test_codebase: str,
+    output_file: Optional[str],
+    format: str,
+):
     """
     Run standardized benchmark suite across models and containers
-    
+
     Executes fixed tasks on standardized codebase to compare:
-    - Baseline (manual AI workflows) vs Tools (our AI dev tools)  
+    - Baseline (manual AI workflows) vs Tools (our AI dev tools)
     - Different models (llama3.2:1b vs llama3.2:3b vs llama3.1:8b)
     - Different Ollama instances (for A/B testing)
-    
+
     Exit code: 0=success, 255=error
     """
     try:
@@ -523,7 +485,7 @@ def standardized(ctx, models: str, ollama_hosts: str, test_codebase: str,
                 # Map common names to ModelSize enum
                 model_map = {
                     "small": ModelSize.SMALL,
-                    "medium": ModelSize.MEDIUM, 
+                    "medium": ModelSize.MEDIUM,
                     "large": ModelSize.LARGE,
                     "xlarge": ModelSize.XLARGE,
                     "llama3.2:1b": ModelSize.SMALL,
@@ -531,7 +493,7 @@ def standardized(ctx, models: str, ollama_hosts: str, test_codebase: str,
                     "llama3.1:8b": ModelSize.LARGE,
                     "llama3.1:70b": ModelSize.XLARGE,
                 }
-                
+
                 if model_str in model_map:
                     model_list.append(model_map[model_str])
                 else:
@@ -544,26 +506,26 @@ def standardized(ctx, models: str, ollama_hosts: str, test_codebase: str,
                         click.echo(f"Warning: Unknown model '{model_str}', skipping", err=True)
             except Exception as e:
                 click.echo(f"Error parsing model '{model_str}': {e}", err=True)
-        
+
         if not model_list:
             click.echo("Error: No valid models specified", err=True)
             sys.exit(255)
-        
+
         # Parse host list
         host_list = [h.strip() for h in ollama_hosts.split(",")]
-        
-        click.echo(f"🚀 Running standardized benchmark suite")
+
+        click.echo("🚀 Running standardized benchmark suite")
         click.echo(f"Models: {[m.value for m in model_list]}")
         click.echo(f"Hosts: {host_list}")
         click.echo(f"Test codebase: {test_codebase}")
         click.echo("")
-        
+
         # Initialize benchmark suite
         suite = BenchmarkSuite(test_codebase)
-        
+
         # Run complete comparison
         results = suite.run_comparison_suite(model_list, host_list)
-        
+
         # Generate report
         if format == "json":
             output = json.dumps(results, indent=2)
@@ -571,18 +533,18 @@ def standardized(ctx, models: str, ollama_hosts: str, test_codebase: str,
             output = json.dumps(results)
         else:  # human
             output = create_benchmark_report(results)
-        
+
         # Save to file if requested
         if output_file:
-            with open(output_file, 'w') as f:
+            with open(output_file, "w") as f:
                 f.write(output)
             click.echo(f"✅ Results saved to {output_file}")
-        
+
         # Print to stdout
         click.echo(output)
-        
+
         sys.exit(0)
-        
+
     except Exception as e:
         click.echo(f"Benchmark failed: {str(e)}", err=True)
         sys.exit(255)
@@ -603,24 +565,24 @@ def standardized(ctx, models: str, ollama_hosts: str, test_codebase: str,
 def setup_models(ctx, host: str, models: str):
     """
     Setup and verify models on Ollama instance
-    
+
     Pulls required models and verifies they're working for benchmarking.
-    
+
     Exit code: 0=success, 1=some failures, 255=complete failure
     """
     try:
         import subprocess
-        
+
         model_list = [m.strip() for m in models.split(",")]
-        
+
         click.echo(f"🔧 Setting up models on {host}")
-        
+
         success_count = 0
         total_count = len(model_list)
-        
+
         for model in model_list:
             click.echo(f"Installing {model}...")
-            
+
             try:
                 # Use ollama CLI to pull model
                 env = {"OLLAMA_HOST": host}
@@ -629,29 +591,29 @@ def setup_models(ctx, host: str, models: str):
                     env=env,
                     capture_output=True,
                     text=True,
-                    timeout=300  # 5 minute timeout
+                    timeout=300,  # 5 minute timeout
                 )
-                
+
                 if result.returncode == 0:
                     click.echo(f"  ✅ {model} installed successfully")
                     success_count += 1
                 else:
                     click.echo(f"  ❌ {model} failed: {result.stderr}", err=True)
-                    
+
             except subprocess.TimeoutExpired:
                 click.echo(f"  ⏰ {model} installation timed out", err=True)
             except Exception as e:
                 click.echo(f"  ❌ {model} error: {e}", err=True)
-        
+
         click.echo(f"\n📊 Setup complete: {success_count}/{total_count} models installed")
-        
+
         if success_count == total_count:
             sys.exit(0)
         elif success_count > 0:
             sys.exit(1)
         else:
             sys.exit(255)
-            
+
     except Exception as e:
         click.echo(f"Setup failed: {str(e)}", err=True)
         sys.exit(255)

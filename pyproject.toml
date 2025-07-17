@@ -70,7 +70,7 @@ Issues = "https://github.com/ai-dev-tools/ai-dev-tools/issues"
 where = ["src"]
 
 [tool.ruff]
-line-length = 88
+line-length = 120
 target-version = "py38"
 
 [tool.ruff.lint]
@@ -108,3 +108,9 @@ heavy = [
 light = 3
 medium = 6
 heavy = 12
+
+[dependency-groups]
+dev = [
+    "mypy>=1.17.0",
+    "ruff>=0.12.3",
+]

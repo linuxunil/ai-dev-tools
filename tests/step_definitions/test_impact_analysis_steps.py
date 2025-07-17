@@ -3,11 +3,12 @@ Step definitions for impact analysis BDD tests
 """
 
 import json
-import tempfile
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
-from pytest_bdd import given, when, then, scenarios
+
+from pytest_bdd import given, scenarios, then, when
 
 from ai_dev_tools.core.impact_analyzer import (
     ImpactAnalyzer,
@@ -43,9 +44,7 @@ def module_and_importer(request):
 
     # Create importing file
     dependent_file = request.cls.temp_path / "main.py"
-    dependent_file.write_text(
-        "from utils import helper_function\n\nprint(helper_function())"
-    )
+    dependent_file.write_text("from utils import helper_function\n\nprint(helper_function())")
 
 
 @given("I have an API file with function definitions and a consumer file")
@@ -86,9 +85,7 @@ def config_and_build_files(request):
 
     # Create code file that might reference config
     code_file = request.cls.temp_path / "app.py"
-    code_file.write_text(
-        'import json\nwith open("config.json") as f:\n    config = json.load(f)'
-    )
+    code_file.write_text('import json\nwith open("config.json") as f:\n    config = json.load(f)')
 
 
 @given("I have a build file and multiple code files")
@@ -149,9 +146,7 @@ def external_file(request):
     """Create a file outside the project directory"""
     import tempfile
 
-    request.cls.external_temp = tempfile.NamedTemporaryFile(
-        mode="w", suffix=".py", delete=False
-    )
+    request.cls.external_temp = tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False)
     request.cls.external_temp.write("def external_function(): pass")
     request.cls.external_temp.close()
     request.cls.target_file = Path(request.cls.external_temp.name)
@@ -188,7 +183,7 @@ GLOBAL_CONSTANT = "global"
     # Create many dependent files
     for i in range(10):
         dependent = request.cls.temp_path / f"dependent_{i}.py"
-        dependent.write_text(f"""
+        dependent.write_text("""
 from central import important_function, CriticalClass, GLOBAL_CONSTANT
 
 def use_central():
@@ -215,9 +210,7 @@ def files_different_impact(request):
 
     # High impact file (build file)
     request.cls.high_impact_file = request.cls.temp_path / "setup.py"
-    request.cls.high_impact_file.write_text(
-        "from setuptools import setup\nsetup(name='test')"
-    )
+    request.cls.high_impact_file.write_text("from setuptools import setup\nsetup(name='test')")
 
     # Create some code files to be affected by build changes
     (request.cls.temp_path / "module.py").write_text("def module_func(): pass")
@@ -261,58 +254,44 @@ def file_impacts_many(request):
 @when("I analyze the impact of the file")
 def analyze_impact(request):
     """Analyze the impact of the target file"""
-    request.cls.analysis = request.cls.analyzer.analyze_file_impact(
-        request.cls.target_file
-    )
+    request.cls.analysis = request.cls.analyzer.analyze_file_impact(request.cls.target_file)
 
 
 @when("I analyze the impact of the module file")
 def analyze_module_impact(request):
     """Analyze the impact of the module file"""
-    request.cls.analysis = request.cls.analyzer.analyze_file_impact(
-        request.cls.target_file
-    )
+    request.cls.analysis = request.cls.analyzer.analyze_file_impact(request.cls.target_file)
 
 
 @when("I analyze the impact of the API file")
 def analyze_api_impact(request):
     """Analyze the impact of the API file"""
-    request.cls.analysis = request.cls.analyzer.analyze_file_impact(
-        request.cls.target_file
-    )
+    request.cls.analysis = request.cls.analyzer.analyze_file_impact(request.cls.target_file)
 
 
 @when("I analyze the impact of the configuration file")
 def analyze_config_impact(request):
     """Analyze the impact of the configuration file"""
-    request.cls.analysis = request.cls.analyzer.analyze_file_impact(
-        request.cls.target_file
-    )
+    request.cls.analysis = request.cls.analyzer.analyze_file_impact(request.cls.target_file)
 
 
 @when("I analyze the impact of the build file")
 def analyze_build_impact(request):
     """Analyze the impact of the build file"""
-    request.cls.analysis = request.cls.analyzer.analyze_file_impact(
-        request.cls.target_file
-    )
+    request.cls.analysis = request.cls.analyzer.analyze_file_impact(request.cls.target_file)
 
 
 @when("I analyze the impact of the code file")
 def analyze_code_impact(request):
     """Analyze the impact of the code file"""
-    request.cls.analysis = request.cls.analyzer.analyze_file_impact(
-        request.cls.target_file
-    )
+    request.cls.analysis = request.cls.analyzer.analyze_file_impact(request.cls.target_file)
 
 
 @when("I attempt to analyze the impact")
 def attempt_analyze_impact(request):
     """Attempt to analyze impact (may fail)"""
     try:
-        request.cls.analysis = request.cls.analyzer.analyze_file_impact(
-            request.cls.target_file
-        )
+        request.cls.analysis = request.cls.analyzer.analyze_file_impact(request.cls.target_file)
         request.cls.error = None
     except Exception as e:
         request.cls.error = e
@@ -322,9 +301,7 @@ def attempt_analyze_impact(request):
 @when("I analyze the impact of the external file")
 def analyze_external_impact(request):
     """Analyze the impact of the external file"""
-    request.cls.analysis = request.cls.analyzer.analyze_file_impact(
-        request.cls.target_file
-    )
+    request.cls.analysis = request.cls.analyzer.analyze_file_impact(request.cls.target_file)
 
 
 @when("I run the impact analysis in silent mode")
@@ -390,24 +367,16 @@ def run_impact_human(request):
 @when("I analyze the impact of the central file")
 def analyze_central_impact(request):
     """Analyze the impact of the central file"""
-    request.cls.analysis = request.cls.analyzer.analyze_file_impact(
-        request.cls.target_file
-    )
+    request.cls.analysis = request.cls.analyzer.analyze_file_impact(request.cls.target_file)
 
 
 @when("I analyze the impact of each file")
 def analyze_each_file_impact(request):
     """Analyze the impact of each file with different impact levels"""
     request.cls.analyses = {}
-    request.cls.analyses["low"] = request.cls.analyzer.analyze_file_impact(
-        request.cls.low_impact_file
-    )
-    request.cls.analyses["medium"] = request.cls.analyzer.analyze_file_impact(
-        request.cls.medium_impact_file
-    )
-    request.cls.analyses["high"] = request.cls.analyzer.analyze_file_impact(
-        request.cls.high_impact_file
-    )
+    request.cls.analyses["low"] = request.cls.analyzer.analyze_file_impact(request.cls.low_impact_file)
+    request.cls.analyses["medium"] = request.cls.analyzer.analyze_file_impact(request.cls.medium_impact_file)
+    request.cls.analyses["high"] = request.cls.analyzer.analyze_file_impact(request.cls.high_impact_file)
 
 
 @when("I run the impact analysis with a file limit")
@@ -445,9 +414,7 @@ def analysis_dependency_impact(request):
     """Verify analysis shows dependency impact"""
     assert request.cls.analysis.total_impacted_files > 0
     dependency_impacts = [
-        impact
-        for impact in request.cls.analysis.impacted_files
-        if impact.impact_type == ImpactType.DEPENDENCY_IMPACT
+        impact for impact in request.cls.analysis.impacted_files if impact.impact_type == ImpactType.DEPENDENCY_IMPACT
     ]
     assert len(dependency_impacts) > 0
 
@@ -457,9 +424,7 @@ def analysis_api_impact(request):
     """Verify analysis shows API impact"""
     assert request.cls.analysis.total_impacted_files > 0
     api_impacts = [
-        impact
-        for impact in request.cls.analysis.impacted_files
-        if impact.impact_type == ImpactType.API_IMPACT
+        impact for impact in request.cls.analysis.impacted_files if impact.impact_type == ImpactType.API_IMPACT
     ]
     assert len(api_impacts) > 0
 
@@ -481,9 +446,7 @@ def analysis_critical_build_impact(request):
     """Verify analysis shows critical build impact"""
     assert request.cls.analysis.total_impacted_files > 0
     build_impacts = [
-        impact
-        for impact in request.cls.analysis.impacted_files
-        if impact.impact_type == ImpactType.BUILD_IMPACT
+        impact for impact in request.cls.analysis.impacted_files if impact.impact_type == ImpactType.BUILD_IMPACT
     ]
     assert len(build_impacts) > 0
 
@@ -493,9 +456,7 @@ def analysis_test_impact(request):
     """Verify analysis shows test impact"""
     assert request.cls.analysis.total_impacted_files > 0
     test_impacts = [
-        impact
-        for impact in request.cls.analysis.impacted_files
-        if impact.impact_type == ImpactType.TEST_IMPACT
+        impact for impact in request.cls.analysis.impacted_files if impact.impact_type == ImpactType.TEST_IMPACT
     ]
     assert len(test_impacts) > 0
 
@@ -529,9 +490,7 @@ def impacted_includes_build_files(request):
     """Verify impacted files include build-related files"""
     impacted_paths = [impact.path for impact in request.cls.analysis.impacted_files]
     # Should include package.json or other build-related files
-    assert any(
-        "package.json" in path or "build" in path.lower() for path in impacted_paths
-    )
+    assert any("package.json" in path or "build" in path.lower() for path in impacted_paths)
 
 
 @then("the impacted files should include the test file")
@@ -596,9 +555,7 @@ def analysis_includes_recommendations(request):
     """Verify analysis includes relevant recommendations"""
     assert len(request.cls.analysis.recommendations) > 0
     rec_text = " ".join(request.cls.analysis.recommendations).lower()
-    assert any(
-        keyword in rec_text for keyword in ["test", "api", "compatibility", "build"]
-    )
+    assert any(keyword in rec_text for keyword in ["test", "api", "compatibility", "build"])
 
 
 @then("the recommendations should mention testing and compatibility")

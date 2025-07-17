@@ -3,8 +3,8 @@
 Test simple CLI tools
 """
 
-import sys
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -38,9 +38,7 @@ def test_simple_safety_cli():
     print(f"   Stdout: '{result.stdout}'")
     print(f"   Stderr: '{result.stderr}'")
     assert result.stdout.strip() == "", "Silent mode should produce no output"
-    assert result.returncode == 1, (
-        f"Expected exit code 1 (medium risk), got {result.returncode}"
-    )
+    assert result.returncode == 1, f"Expected exit code 1 (medium risk), got {result.returncode}"
 
     # Test 2: Human format
     print("\n2. Testing human format...")
@@ -96,9 +94,7 @@ def test_simple_safety_cli():
     )
 
     print(f"   Exit code: {result.returncode}")
-    assert result.returncode == 3, (
-        f"Expected exit code 3 (critical), got {result.returncode}"
-    )
+    assert result.returncode == 3, f"Expected exit code 3 (critical), got {result.returncode}"
 
     # Test 5: Non-existent file
     print("\n5. Testing non-existent file...")
@@ -114,9 +110,7 @@ def test_simple_safety_cli():
     )
 
     print(f"   Exit code: {result.returncode}")
-    assert result.returncode == 3, (
-        f"Expected exit code 3 (critical), got {result.returncode}"
-    )
+    assert result.returncode == 3, f"Expected exit code 3 (critical), got {result.returncode}"
 
     # Test 6: AI workflow simulation
     print("\n6. Testing AI workflow simulation...")
@@ -138,14 +132,10 @@ def test_simple_safety_cli():
         )
 
         risk_level = result.returncode
-        should_modify = (
-            risk_level <= 1
-        )  # AI decision: only modify safe/medium risk files
+        should_modify = risk_level <= 1  # AI decision: only modify safe/medium risk files
         ai_decisions.append((file_path, risk_level, should_modify))
 
-        assert risk_level == expected_risk, (
-            f"Expected risk {expected_risk}, got {risk_level}"
-        )
+        assert risk_level == expected_risk, f"Expected risk {expected_risk}, got {risk_level}"
 
     print("   AI decisions based on exit codes:")
     for file_path, risk, should_modify in ai_decisions:
@@ -153,9 +143,7 @@ def test_simple_safety_cli():
 
     # AI should decide to modify only the medium risk file
     safe_to_modify = [decision for decision in ai_decisions if decision[2]]
-    assert len(safe_to_modify) == 1, (
-        f"Expected 1 file safe to modify, got {len(safe_to_modify)}"
-    )
+    assert len(safe_to_modify) == 1, f"Expected 1 file safe to modify, got {len(safe_to_modify)}"
 
     print("\n✅ All CLI tests passed!")
     return True

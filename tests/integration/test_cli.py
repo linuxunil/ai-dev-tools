@@ -3,8 +3,8 @@
 Test CLI tools
 """
 
-import sys
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -38,9 +38,7 @@ def test_safety_cli():
     print(f"   Stdout: '{result.stdout}'")
     print(f"   Stderr: '{result.stderr}'")
     assert result.stdout == "", "Silent mode should produce no output"
-    assert result.returncode == 1, (
-        f"Expected exit code 1 (medium risk), got {result.returncode}"
-    )
+    assert result.returncode == 1, f"Expected exit code 1 (medium risk), got {result.returncode}"
 
     # Test 2: Human format
     print("\n2. Testing human format...")
@@ -94,9 +92,7 @@ def test_safety_cli():
     )
 
     print(f"   Exit code: {result.returncode}")
-    assert result.returncode == 3, (
-        f"Expected exit code 3 (critical), got {result.returncode}"
-    )
+    assert result.returncode == 3, f"Expected exit code 3 (critical), got {result.returncode}"
 
     # Test 5: Non-existent file
     print("\n5. Testing non-existent file...")
@@ -108,9 +104,7 @@ def test_safety_cli():
     )
 
     print(f"   Exit code: {result.returncode}")
-    assert result.returncode == 3, (
-        f"Expected exit code 3 (critical), got {result.returncode}"
-    )
+    assert result.returncode == 3, f"Expected exit code 3 (critical), got {result.returncode}"
 
     print("\n✅ All CLI tests passed!")
     return True

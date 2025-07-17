@@ -2,13 +2,15 @@
 Basic tests for ImpactAnalyzer - Core functionality validation
 """
 
-import pytest
 import tempfile
 from pathlib import Path
+
+import pytest
+
 from ai_dev_tools.core.impact_analyzer import (
     ImpactAnalyzer,
-    ImpactType,
     ImpactSeverity,
+    ImpactType,
 )
 
 
@@ -63,18 +65,13 @@ class TestImpactAnalyzer:
 
             # Create a file that imports the module
             dependent_file = temp_path / "main.py"
-            dependent_file.write_text(
-                "from utils import helper_function\n\nprint(helper_function())"
-            )
+            dependent_file.write_text("from utils import helper_function\n\nprint(helper_function())")
 
             analysis = analyzer.analyze_file_impact(module_file)
 
             assert analysis.total_impacted_files > 0
             assert analysis.severity_score > 0
-            assert any(
-                impact.impact_type == ImpactType.DEPENDENCY_IMPACT
-                for impact in analysis.impacted_files
-            )
+            assert any(impact.impact_type == ImpactType.DEPENDENCY_IMPACT for impact in analysis.impacted_files)
 
             # Check that main.py is identified as impacted
             impacted_paths = [impact.path for impact in analysis.impacted_files]
@@ -110,11 +107,7 @@ obj.method()
             analysis = analyzer.analyze_file_impact(api_file)
 
             assert analysis.total_impacted_files > 0
-            api_impacts = [
-                impact
-                for impact in analysis.impacted_files
-                if impact.impact_type == ImpactType.API_IMPACT
-            ]
+            api_impacts = [impact for impact in analysis.impacted_files if impact.impact_type == ImpactType.API_IMPACT]
             assert len(api_impacts) > 0
 
             # Check that consumer.py is identified as impacted
@@ -139,9 +132,7 @@ obj.method()
 
             assert analysis.total_impacted_files > 0
             config_impacts = [
-                impact
-                for impact in analysis.impacted_files
-                if impact.impact_type == ImpactType.CONFIGURATION_IMPACT
+                impact for impact in analysis.impacted_files if impact.impact_type == ImpactType.CONFIGURATION_IMPACT
             ]
             assert len(config_impacts) > 0
 
@@ -169,9 +160,7 @@ build-backend = "setuptools.build_meta"
             assert analysis.total_impacted_files > 0
             assert analysis.max_severity == ImpactSeverity.CRITICAL
             build_impacts = [
-                impact
-                for impact in analysis.impacted_files
-                if impact.impact_type == ImpactType.BUILD_IMPACT
+                impact for impact in analysis.impacted_files if impact.impact_type == ImpactType.BUILD_IMPACT
             ]
             assert len(build_impacts) > 0
 
@@ -207,9 +196,7 @@ def test_multiply():
             analysis = analyzer.analyze_file_impact(code_file)
 
             test_impacts = [
-                impact
-                for impact in analysis.impacted_files
-                if impact.impact_type == ImpactType.TEST_IMPACT
+                impact for impact in analysis.impacted_files if impact.impact_type == ImpactType.TEST_IMPACT
             ]
             assert len(test_impacts) > 0
 
@@ -236,9 +223,7 @@ class CriticalClass:
             # Create multiple dependent files
             for i in range(5):
                 dependent = temp_path / f"dependent_{i}.py"
-                dependent.write_text(
-                    f"from central import important_function\nresult = important_function()"
-                )
+                dependent.write_text("from central import important_function\nresult = important_function()")
 
             analysis = analyzer.analyze_file_impact(central_file)
 
@@ -274,9 +259,7 @@ class CriticalClass:
             analyzer = ImpactAnalyzer(temp_path)
 
             # Create a file outside the project
-            with tempfile.NamedTemporaryFile(
-                mode="w", suffix=".py", delete=False
-            ) as external_file:
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as external_file:
                 external_file.write("def external_function(): pass")
                 external_file_path = Path(external_file.name)
 
@@ -309,9 +292,7 @@ class CriticalClass:
             code_files = ["test.py", "test.js", "test.ts", "test.rs", "test.go"]
             for filename in code_files:
                 path = temp_path / filename
-                assert analyzer._is_code_file(path), (
-                    f"{filename} should be detected as code file"
-                )
+                assert analyzer._is_code_file(path), f"{filename} should be detected as code file"
 
             # Test config file detection
             config_files = [
@@ -322,9 +303,7 @@ class CriticalClass:
             ]
             for filename in config_files:
                 path = temp_path / filename
-                assert analyzer._is_config_file(path), (
-                    f"{filename} should be detected as config file"
-                )
+                assert analyzer._is_config_file(path), f"{filename} should be detected as config file"
 
             # Test test file detection
             test_files = [
@@ -335,9 +314,7 @@ class CriticalClass:
             ]
             for filename in test_files:
                 path = temp_path / filename
-                assert analyzer._is_test_file(path), (
-                    f"{filename} should be detected as test file"
-                )
+                assert analyzer._is_test_file(path), f"{filename} should be detected as test file"
 
     def test_api_extraction(self):
         """Test API definition extraction"""

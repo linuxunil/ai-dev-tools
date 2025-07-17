@@ -2,10 +2,10 @@
 Medium complexity data processing with common patterns
 """
 
-import json
 import csv
-from typing import List, Dict, Any, Optional
+import json
 from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 
 class DataProcessor:
@@ -19,7 +19,7 @@ class DataProcessor:
     def process_json_file(self, file_path: str) -> Optional[Dict[str, Any]]:
         """Process JSON file with error handling"""
         try:
-            with open(file_path, "r") as f:
+            with open(file_path) as f:
                 data = json.load(f)
             self.processed_count += 1
             return self._validate_data(data)
@@ -34,7 +34,7 @@ class DataProcessor:
         """Process CSV file with error handling"""
         results = []
         try:
-            with open(file_path, "r") as f:
+            with open(file_path) as f:
                 reader = csv.DictReader(f)
                 for row in reader:
                     validated_row = self._validate_row(row)
@@ -75,16 +75,13 @@ class DataProcessor:
         return {
             "processed": self.processed_count,
             "errors": self.error_count,
-            "success_rate": self.processed_count
-            / (self.processed_count + self.error_count)
+            "success_rate": self.processed_count / (self.processed_count + self.error_count)
             if (self.processed_count + self.error_count) > 0
             else 0,
         }
 
 
-def batch_process_files(
-    file_paths: List[str], config: Dict[str, Any]
-) -> Dict[str, Any]:
+def batch_process_files(file_paths: List[str], config: Dict[str, Any]) -> Dict[str, Any]:
     """Batch process multiple files"""
     processor = DataProcessor(config)
     results = []

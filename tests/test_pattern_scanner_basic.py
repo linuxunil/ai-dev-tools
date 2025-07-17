@@ -4,7 +4,6 @@ Basic Pattern Scanner Tests
 Tests core pattern scanning functionality to ensure it works correctly.
 """
 
-import pytest
 import tempfile
 from pathlib import Path
 
@@ -77,9 +76,7 @@ mkIf config.programs.git.enable home.packages = with pkgs; [ git ];
         """Test pattern type detection works correctly"""
         # Test mkIf home.packages pattern
         target_file = self.test_path / "mkif.nix"
-        target_file.write_text(
-            "mkIf config.programs.git.enable home.packages = with pkgs; [ git ];"
-        )
+        target_file.write_text("mkIf config.programs.git.enable home.packages = with pkgs; [ git ];")
 
         result = self.scanner.scan_for_similar_patterns(
             target_file=str(target_file), target_line=1, search_dir=str(self.test_path)
@@ -96,9 +93,7 @@ mkIf config.programs.git.enable home.packages = with pkgs; [ git ];
         # Create multiple similar files
         for i in range(10):
             similar_file = self.test_path / f"similar_{i}.nix"
-            similar_file.write_text(
-                f"mkIf config.test{i} home.packages = with pkgs; [ test{i} ];"
-            )
+            similar_file.write_text(f"mkIf config.test{i} home.packages = with pkgs; [ test{i} ];")
 
         result = self.scanner.scan_for_similar_patterns(
             target_file=str(target_file),

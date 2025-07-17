@@ -4,12 +4,10 @@ Token Efficiency Tests
 Tests that measure and validate token savings from exit-code-first design.
 """
 
+import json
 import subprocess
-import pytest
 import tempfile
 from pathlib import Path
-import json
-import sys
 
 
 class TestTokenEfficiency:
@@ -32,9 +30,7 @@ class TestTokenEfficiency:
 }
 """)
 
-    def run_tool_with_format(
-        self, tool: str, format_type: str, *args
-    ) -> tuple[int, str]:
+    def run_tool_with_format(self, tool: str, format_type: str, *args) -> tuple[int, str]:
         """Run tool with specific format and return exit code and output"""
         cmd = [tool] + list(args) + ["--format", format_type]
         result = subprocess.run(cmd, capture_output=True, text=True, cwd=self.repo_path)
@@ -101,9 +97,7 @@ class TestTokenEfficiency:
         outputs = {}
 
         for format_type in formats:
-            exit_code, output = self.run_tool_with_format(
-                "ai-safety-check", format_type, f"{self.repo_path}/test.nix"
-            )
+            exit_code, output = self.run_tool_with_format("ai-safety-check", format_type, f"{self.repo_path}/test.nix")
             outputs[format_type] = {
                 "exit_code": exit_code,
                 "output": output,
@@ -168,9 +162,7 @@ class TestTokenEfficiency:
         exit_code_tokens = 0
 
         # Step 1: Check repo status (exit code only)
-        exit_code, output = self.run_tool_with_format(
-            "ai-repo-status", "silent", "--repo-path", str(self.repo_path)
-        )
+        exit_code, output = self.run_tool_with_format("ai-repo-status", "silent", "--repo-path", str(self.repo_path))
         exit_code_tokens += self.count_tokens_approximate(output)
 
         # Step 2: Find patterns (exit code only)
@@ -184,9 +176,7 @@ class TestTokenEfficiency:
         exit_code_tokens += self.count_tokens_approximate(output)
 
         # Step 3: Check safety (exit code only)
-        exit_code, output = self.run_tool_with_format(
-            "ai-safety-check", "silent", f"{self.repo_path}/test.nix"
-        )
+        exit_code, output = self.run_tool_with_format("ai-safety-check", "silent", f"{self.repo_path}/test.nix")
         exit_code_tokens += self.count_tokens_approximate(output)
 
         # Exit-code approach should use 0 tokens
@@ -194,9 +184,7 @@ class TestTokenEfficiency:
 
         # Calculate savings
         token_savings = traditional_tokens - exit_code_tokens
-        efficiency_improvement = (
-            token_savings / traditional_tokens if traditional_tokens > 0 else 1
-        )
+        efficiency_improvement = token_savings / traditional_tokens if traditional_tokens > 0 else 1
 
         # Should achieve 100% token savings
         assert efficiency_improvement == 1.0  # 100% savings
@@ -274,9 +262,7 @@ class TestOutputQuality:
             # Exit code should match data
             assert exit_code == data["count"]
 
-    def run_tool_with_format(
-        self, tool: str, format_type: str, *args
-    ) -> tuple[int, str]:
+    def run_tool_with_format(self, tool: str, format_type: str, *args) -> tuple[int, str]:
         """Run tool with specific format and return exit code and output"""
         cmd = [tool] + list(args) + ["--format", format_type]
         result = subprocess.run(cmd, capture_output=True, text=True, cwd=self.repo_path)

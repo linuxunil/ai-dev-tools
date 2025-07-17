@@ -3,11 +3,12 @@ Step definitions for Output Strategy BDD tests
 """
 
 import json
-from pytest_bdd import scenarios, given, when, then, parsers
+
+from pytest_bdd import given, scenarios, then, when
 
 from ai_dev_tools.core.output_strategy import (
-    OutputFormatter,
     OutputFormat,
+    OutputFormatter,
     create_ai_optimized_result,
 )
 
@@ -46,9 +47,7 @@ def format_human(test_context):
 def create_ai_result(test_context):
     """Create AI-optimized result"""
     data = test_context["data"]
-    result = create_ai_optimized_result(
-        count=data["count"], items=data["items"], metadata=data["metadata"]
-    )
+    result = create_ai_optimized_result(count=data["count"], items=data["items"], metadata=data["metadata"])
     test_context["ai_result"] = result
 
 
@@ -57,7 +56,7 @@ def output_is_compact_json(test_context):
     """Output should be compact JSON"""
     output = test_context["output"]
     # Should be valid JSON
-    parsed = json.loads(output)
+    json.loads(output)
     # Should not contain whitespace (compact)
     assert "\n" not in output
     assert "  " not in output

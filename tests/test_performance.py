@@ -6,13 +6,12 @@ performance characteristics.
 """
 
 import subprocess
-import pytest
 import tempfile
-from pathlib import Path
 import time
+from pathlib import Path
+from typing import Dict
+
 import psutil
-import os
-from typing import List, Dict, Any
 
 
 class TestExecutionSpeed:
@@ -105,9 +104,7 @@ class TestExecutionSpeed:
         )
 
         # Should still complete in reasonable time
-        assert large_time < 10.0, (
-            f"Large pattern scan took {large_time:.2f}s, expected < 10.0s"
-        )
+        assert large_time < 10.0, f"Large pattern scan took {large_time:.2f}s, expected < 10.0s"
 
     def test_safety_checker_speed(self):
         """Test safety checker execution speed"""
@@ -123,16 +120,12 @@ class TestExecutionSpeed:
             exec_time = self.measure_execution_time("ai-safety-check", str(test_file))
 
             # Safety checking should be very fast (file analysis only)
-            assert exec_time < 1.0, (
-                f"Safety check of {test_file.name} took {exec_time:.2f}s, expected < 1.0s"
-            )
+            assert exec_time < 1.0, f"Safety check of {test_file.name} took {exec_time:.2f}s, expected < 1.0s"
 
     def test_repo_analyzer_speed(self):
         """Test repository analyzer execution speed"""
 
-        exec_time = self.measure_execution_time(
-            "ai-repo-status", "--repo-path", str(self.repo_path)
-        )
+        exec_time = self.measure_execution_time("ai-repo-status", "--repo-path", str(self.repo_path))
 
         # Repository analysis should complete quickly
         assert exec_time < 5.0, f"Repo analysis took {exec_time:.2f}s, expected < 5.0s"
@@ -157,15 +150,11 @@ class TestExecutionSpeed:
         batch_time = time.time() - start_time
 
         # Batch operations should be efficient
-        assert batch_time < 3.0, (
-            f"Batch operations took {batch_time:.2f}s, expected < 3.0s"
-        )
+        assert batch_time < 3.0, f"Batch operations took {batch_time:.2f}s, expected < 3.0s"
 
         # Average per operation should be very fast
         avg_time = batch_time / 5
-        assert avg_time < 0.6, (
-            f"Average operation time {avg_time:.2f}s, expected < 0.6s"
-        )
+        assert avg_time < 0.6, f"Average operation time {avg_time:.2f}s, expected < 0.6s"
 
 
 class TestMemoryUsage:
@@ -218,17 +207,13 @@ class TestMemoryUsage:
         )
 
         # Should use reasonable memory (< 100MB for simple operations)
-        assert memory_stats["max_rss_mb"] < 100, (
-            f"Used {memory_stats['max_rss_mb']:.1f}MB, expected < 100MB"
-        )
+        assert memory_stats["max_rss_mb"] < 100, f"Used {memory_stats['max_rss_mb']:.1f}MB, expected < 100MB"
 
         # Test safety checker memory usage
         memory_stats = self.measure_memory_usage("ai-safety-check", str(test_file))
 
         # Safety checking should use minimal memory
-        assert memory_stats["max_rss_mb"] < 50, (
-            f"Used {memory_stats['max_rss_mb']:.1f}MB, expected < 50MB"
-        )
+        assert memory_stats["max_rss_mb"] < 50, f"Used {memory_stats['max_rss_mb']:.1f}MB, expected < 50MB"
 
 
 class TestScalability:
@@ -279,9 +264,7 @@ class TestScalability:
             )
             exec_time = time.time() - start_time
 
-            assert exec_time < time_limit, (
-                f"{num_files} files took {exec_time:.2f}s, expected < {time_limit}s"
-            )
+            assert exec_time < time_limit, f"{num_files} files took {exec_time:.2f}s, expected < {time_limit}s"
             assert result.returncode >= 0  # Should succeed
 
     def test_linear_scaling(self):
@@ -312,9 +295,7 @@ class TestScalability:
         # Check that scaling is reasonable (not exponential)
         # Time for 40 files should be less than 5x time for 10 files
         scaling_factor = times[2] / times[0]  # 40 files vs 10 files
-        assert scaling_factor < 5.0, (
-            f"Scaling factor {scaling_factor:.2f} too high, expected < 5.0"
-        )
+        assert scaling_factor < 5.0, f"Scaling factor {scaling_factor:.2f} too high, expected < 5.0"
 
 
 class TestConcurrency:
@@ -354,9 +335,7 @@ class TestConcurrency:
         assert all(result != -1 for result in results)  # No signals
 
         # Should complete quickly when run concurrently
-        assert concurrent_time < 5.0, (
-            f"Concurrent execution took {concurrent_time:.2f}s, expected < 5.0s"
-        )
+        assert concurrent_time < 5.0, f"Concurrent execution took {concurrent_time:.2f}s, expected < 5.0s"
 
 
 class TestPerformanceRegression:

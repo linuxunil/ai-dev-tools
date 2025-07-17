@@ -29,9 +29,7 @@ def cli():
     default="silent",
     help="Output format (default: silent for AI efficiency)",
 )
-def fix_and_propagate(
-    fixed_file: str, fixed_line: int, search_dir: str, max_patterns: int, format: str
-):
+def fix_and_propagate(fixed_file: str, fixed_line: int, search_dir: str, max_patterns: int, format: str):
     """
     Core AI workflow: find similar patterns after fixing one location
 
@@ -61,9 +59,7 @@ def fix_and_propagate(
             output += f"Summary: {result.summary}\n"
             output += f"Patterns found: {result.similar_patterns['count']}\n"
             output += f"Safe files: {result.safety_assessment['safe_files']}\n"
-            output += (
-                f"High-risk files: {result.safety_assessment['high_risk_files']}\n"
-            )
+            output += f"High-risk files: {result.safety_assessment['high_risk_files']}\n"
             if result.recommendations:
                 output += "Recommendations:\n"
                 for i, rec in enumerate(result.recommendations, 1):

@@ -31,9 +31,7 @@ from ..core.difference_analyzer import DifferenceAnalyzer
     default=False,
     help="Ignore comment-only changes (default: False)",
 )
-def main(
-    path1: str, path2: str, format: str, ignore_whitespace: bool, ignore_comments: bool
-):
+def main(path1: str, path2: str, format: str, ignore_whitespace: bool, ignore_comments: bool):
     """
     Analyze differences between files or directories
 
@@ -43,9 +41,7 @@ def main(
     """
     try:
         # Initialize analyzer
-        analyzer = DifferenceAnalyzer(
-            ignore_whitespace=ignore_whitespace, ignore_comments=ignore_comments
-        )
+        analyzer = DifferenceAnalyzer(ignore_whitespace=ignore_whitespace, ignore_comments=ignore_comments)
 
         # Convert to Path objects
         path1_obj = Path(path1)
@@ -102,15 +98,11 @@ def main(
                         "critical": "!!!",
                     }.get(diff.significance.value, "?")
 
-                    click.echo(
-                        f"    {significance_marker} {diff.path}: {diff.difference_type.value}"
-                    )
+                    click.echo(f"    {significance_marker} {diff.path}: {diff.difference_type.value}")
                     if diff.details:
                         click.echo(f"      {diff.details}")
             elif analysis.differences:
-                click.echo(
-                    f"  ({len(analysis.differences)} differences - use --format=json for full details)"
-                )
+                click.echo(f"  ({len(analysis.differences)} differences - use --format=json for full details)")
         # format == "silent" produces no output
 
         # Exit with significant differences count (capped at 254)

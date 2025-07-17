@@ -3,15 +3,16 @@ Step definitions for difference analysis BDD tests
 """
 
 import json
-import tempfile
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
-from pytest_bdd import given, when, then, scenarios
+
+from pytest_bdd import given, scenarios, then, when
 
 from ai_dev_tools.core.difference_analyzer import (
-    DifferenceAnalyzer,
     ChangeSignificance,
+    DifferenceAnalyzer,
     DifferenceType,
 )
 
@@ -150,9 +151,7 @@ def many_differences_directories(request):
 @when("I compare the files")
 def compare_files(request):
     """Compare the files using the analyzer"""
-    request.cls.analysis = request.cls.analyzer.compare_files(
-        request.cls.file1, request.cls.file2
-    )
+    request.cls.analysis = request.cls.analyzer.compare_files(request.cls.file1, request.cls.file2)
 
 
 @when("I compare the files with whitespace ignored")
@@ -172,18 +171,14 @@ def compare_files_strict_whitespace(request):
 @when("I compare the directories")
 def compare_directories(request):
     """Compare the directories using the analyzer"""
-    request.cls.analysis = request.cls.analyzer.compare_directories(
-        request.cls.dir1, request.cls.dir2
-    )
+    request.cls.analysis = request.cls.analyzer.compare_directories(request.cls.dir1, request.cls.dir2)
 
 
 @when("I attempt to compare the files")
 def attempt_compare_files(request):
     """Attempt to compare files (may fail)"""
     try:
-        request.cls.analysis = request.cls.analyzer.compare_files(
-            request.cls.file1, request.cls.file2
-        )
+        request.cls.analysis = request.cls.analyzer.compare_files(request.cls.file1, request.cls.file2)
         request.cls.error = None
     except Exception as e:
         request.cls.error = e

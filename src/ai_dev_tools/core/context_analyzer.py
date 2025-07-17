@@ -180,9 +180,7 @@ class ContextAnalyzer:
         key_directories = self._find_key_directories()
 
         # Calculate complexity score
-        complexity_score = self._calculate_complexity(
-            all_files, dependencies, build_tools, test_frameworks
-        )
+        complexity_score = self._calculate_complexity(all_files, dependencies, build_tools, test_frameworks)
 
         # Count file types
         code_files = len([f for f in all_files if self._is_code_file(f)])
@@ -289,9 +287,7 @@ class ContextAnalyzer:
 
         return max(framework_scores, key=lambda x: framework_scores[x])
 
-    def _analyze_dependencies(
-        self, files: List[Path], project_type: ProjectType
-    ) -> List[DependencyInfo]:
+    def _analyze_dependencies(self, files: List[Path], project_type: ProjectType) -> List[DependencyInfo]:
         """Analyze project dependencies"""
         dependencies = []
 
@@ -308,18 +304,11 @@ class ContextAnalyzer:
                     dev_deps = content.get("devDependencies", {})
 
                     for name, version in deps.items():
-                        dependencies.append(
-                            DependencyInfo(name, version, False, str(file_path))
-                        )
+                        dependencies.append(DependencyInfo(name, version, False, str(file_path)))
                     for name, version in dev_deps.items():
-                        dependencies.append(
-                            DependencyInfo(name, version, True, str(file_path))
-                        )
+                        dependencies.append(DependencyInfo(name, version, True, str(file_path)))
 
-                elif (
-                    file_name == "requirements.txt"
-                    and project_type == ProjectType.PYTHON
-                ):
+                elif file_name == "requirements.txt" and project_type == ProjectType.PYTHON:
                     content = file_path.read_text()
                     for line in content.splitlines():
                         line = line.strip()
@@ -329,13 +318,9 @@ class ContextAnalyzer:
                             if match:
                                 name = match.group(1)
                                 version = match.group(2) if match.group(2) else None
-                                dependencies.append(
-                                    DependencyInfo(name, version, False, str(file_path))
-                                )
+                                dependencies.append(DependencyInfo(name, version, False, str(file_path)))
 
-                elif (
-                    file_name == "pyproject.toml" and project_type == ProjectType.PYTHON
-                ):
+                elif file_name == "pyproject.toml" and project_type == ProjectType.PYTHON:
                     # Basic TOML parsing for dependencies
                     content = file_path.read_text()
                     in_dependencies = False
@@ -367,40 +352,26 @@ class ContextAnalyzer:
                                                     str(file_path),
                                                 )
                                             )
-                        elif line.startswith("[") and (
-                            in_dependencies or in_project_deps
-                        ):
+                        elif line.startswith("[") and (in_dependencies or in_project_deps):
                             in_dependencies = False
                             in_project_deps = False
-                        elif (
-                            in_project_deps
-                            and line.startswith('"')
-                            and line.endswith('",')
-                        ):
+                        elif in_project_deps and line.startswith('"') and line.endswith('",'):
                             # Multi-line dependencies array
                             dep = line.strip().strip('",')
                             name = re.match(r"([a-zA-Z0-9_-]+)", dep)
                             if name:
-                                dependencies.append(
-                                    DependencyInfo(
-                                        name.group(1), None, False, str(file_path)
-                                    )
-                                )
+                                dependencies.append(DependencyInfo(name.group(1), None, False, str(file_path)))
                         elif in_dependencies and "=" in line:
                             name = line.split("=")[0].strip().strip('"')
                             if name != "python":
-                                dependencies.append(
-                                    DependencyInfo(name, None, False, str(file_path))
-                                )
+                                dependencies.append(DependencyInfo(name, None, False, str(file_path)))
 
             except (json.JSONDecodeError, UnicodeDecodeError, PermissionError):
                 continue
 
         return dependencies
 
-    def _find_entry_points(
-        self, files: List[Path], project_type: ProjectType
-    ) -> List[str]:
+    def _find_entry_points(self, files: List[Path], project_type: ProjectType) -> List[str]:
         """Find project entry points"""
         entry_points = []
 
@@ -435,9 +406,7 @@ class ContextAnalyzer:
 
         return detected_tools
 
-    def _detect_test_frameworks(
-        self, files: List[Path], dependencies: List[DependencyInfo]
-    ) -> List[str]:
+    def _detect_test_frameworks(self, files: List[Path], dependencies: List[DependencyInfo]) -> List[str]:
         """Detect test frameworks"""
         detected_frameworks = []
 
@@ -453,10 +422,7 @@ class ContextAnalyzer:
             if "test" in file_name or "spec" in file_name:
                 if file_path.suffix == ".py" and "pytest" not in detected_frameworks:
                     detected_frameworks.append("pytest")
-                elif (
-                    file_path.suffix in [".js", ".ts"]
-                    and "jest" not in detected_frameworks
-                ):
+                elif file_path.suffix in [".js", ".ts"] and "jest" not in detected_frameworks:
                     detected_frameworks.append("jest")
 
         return detected_frameworks
@@ -478,8 +444,7 @@ class ContextAnalyzer:
         for dir_path in self.project_path.iterdir():
             if dir_path.is_dir() and not dir_path.name.startswith("."):
                 if dir_path.name in common_dirs or any(
-                    keyword in dir_path.name.lower()
-                    for keyword in ["test", "spec", "doc"]
+                    keyword in dir_path.name.lower() for keyword in ["test", "spec", "doc"]
                 ):
                     key_dirs.append(dir_path.name)
 
@@ -556,7 +521,4 @@ class ContextAnalyzer:
             ".env",
         }
 
-        return (
-            file_path.suffix.lower() in config_extensions
-            or file_path.name.lower() in config_names
-        )
+        return file_path.suffix.lower() in config_extensions or file_path.name.lower() in config_names

@@ -224,18 +224,11 @@ class ImpactAnalyzer:
 
                 line_numbers = []
                 for i, line in enumerate(content.splitlines(), 1):
-                    if any(
-                        re.search(pattern, line, re.IGNORECASE)
-                        for pattern in import_patterns
-                    ):
+                    if any(re.search(pattern, line, re.IGNORECASE) for pattern in import_patterns):
                         line_numbers.append(i)
 
                 if line_numbers:
-                    severity = (
-                        ImpactSeverity.MEDIUM
-                        if len(line_numbers) > 3
-                        else ImpactSeverity.LOW
-                    )
+                    severity = ImpactSeverity.MEDIUM if len(line_numbers) > 3 else ImpactSeverity.LOW
 
                     rel_path = self._get_relative_path(file_path)
                     impacted.append(
@@ -276,9 +269,7 @@ class ImpactAnalyzer:
                     continue
 
                 try:
-                    file_content = file_path.read_text(
-                        encoding="utf-8", errors="ignore"
-                    )
+                    file_content = file_path.read_text(encoding="utf-8", errors="ignore")
 
                     usage_lines = []
                     for i, line in enumerate(file_content.splitlines(), 1):
@@ -287,11 +278,7 @@ class ImpactAnalyzer:
                                 usage_lines.append(i)
 
                     if usage_lines:
-                        severity = (
-                            ImpactSeverity.HIGH
-                            if len(usage_lines) > 5
-                            else ImpactSeverity.MEDIUM
-                        )
+                        severity = ImpactSeverity.HIGH if len(usage_lines) > 5 else ImpactSeverity.MEDIUM
 
                         rel_path = self._get_relative_path(file_path)
                         impacted.append(
@@ -333,9 +320,7 @@ class ImpactAnalyzer:
 
             # Build files are highly impacted by config changes
             if file_path.name in self.BUILD_FILES:
-                config_impact_files.append(
-                    (file_path, ImpactSeverity.HIGH, "Build configuration dependency")
-                )
+                config_impact_files.append((file_path, ImpactSeverity.HIGH, "Build configuration dependency"))
 
             # Code files may read configuration
             elif self._is_code_file(file_path):
@@ -344,9 +329,7 @@ class ImpactAnalyzer:
                     config_name = target_file.stem
 
                     # Look for references to the config file
-                    if re.search(
-                        rf"\b{re.escape(config_name)}\b", content, re.IGNORECASE
-                    ):
+                    if re.search(rf"\b{re.escape(config_name)}\b", content, re.IGNORECASE):
                         config_impact_files.append(
                             (
                                 file_path,
@@ -381,11 +364,7 @@ class ImpactAnalyzer:
             severity = ImpactSeverity.CRITICAL
 
             # Find all code files that could be affected
-            affected_files = [
-                f
-                for f in self._get_project_files()
-                if self._is_code_file(f) and f != target_file
-            ]
+            affected_files = [f for f in self._get_project_files() if self._is_code_file(f) and f != target_file]
 
             # Limit to representative sample to avoid overwhelming output
             for file_path in affected_files[:20]:
@@ -472,10 +451,7 @@ class ImpactAnalyzer:
 
     def _is_config_file(self, file_path: Path) -> bool:
         """Check if file is a configuration file"""
-        return (
-            file_path.suffix.lower() in self.CONFIG_EXTENSIONS
-            or file_path.name in self.BUILD_FILES
-        )
+        return file_path.suffix.lower() in self.CONFIG_EXTENSIONS or file_path.name in self.BUILD_FILES
 
     def _is_test_file(self, file_path: Path) -> bool:
         """Check if file is a test file"""
@@ -552,9 +528,7 @@ class ImpactAnalyzer:
             ImpactSeverity.CRITICAL: 50,
         }
 
-        total_score = sum(
-            severity_weights.get(file.severity, 0) for file in impacted_files
-        )
+        total_score = sum(severity_weights.get(file.severity, 0) for file in impacted_files)
 
         # Add bonus for number of files impacted
         file_count_bonus = min(50, len(impacted_files) * 2)
@@ -582,9 +556,7 @@ class ImpactAnalyzer:
 
         return max_severity
 
-    def _generate_summary(
-        self, impacted_files: List[ImpactedFile], target_file: str
-    ) -> str:
+    def _generate_summary(self, impacted_files: List[ImpactedFile], target_file: str) -> str:
         """Generate a summary of the impact analysis"""
         if not impacted_files:
             return f"No impact detected for changes to {target_file}"
@@ -603,22 +575,16 @@ class ImpactAnalyzer:
         summary_parts = [f"Changes to {target_file} impact {total_files} files"]
 
         if impact_types:
-            type_summary = ", ".join(
-                f"{count} {itype}" for itype, count in impact_types.items()
-            )
+            type_summary = ", ".join(f"{count} {itype}" for itype, count in impact_types.items())
             summary_parts.append(f"Impact types: {type_summary}")
 
         if severity_counts:
-            severity_summary = ", ".join(
-                f"{count} {sev}" for sev, count in severity_counts.items()
-            )
+            severity_summary = ", ".join(f"{count} {sev}" for sev, count in severity_counts.items())
             summary_parts.append(f"Severity: {severity_summary}")
 
         return "; ".join(summary_parts)
 
-    def _generate_recommendations(
-        self, impacted_files: List[ImpactedFile], target_file: Path
-    ) -> List[str]:
+    def _generate_recommendations(self, impacted_files: List[ImpactedFile], target_file: Path) -> List[str]:
         """Generate recommendations based on impact analysis"""
         recommendations = []
 
@@ -629,10 +595,7 @@ class ImpactAnalyzer:
         # General recommendations based on impact types
         impact_types = {file.impact_type for file in impacted_files}
 
-        if (
-            ImpactType.BREAKING_CHANGE in impact_types
-            or ImpactType.BUILD_IMPACT in impact_types
-        ):
+        if ImpactType.BREAKING_CHANGE in impact_types or ImpactType.BUILD_IMPACT in impact_types:
             recommendations.append("Run full test suite before deploying")
             recommendations.append("Consider creating a migration guide")
 
@@ -647,19 +610,11 @@ class ImpactAnalyzer:
             recommendations.append("Update and run affected tests")
 
         if ImpactType.CONFIGURATION_IMPACT in impact_types:
-            recommendations.append(
-                "Verify configuration compatibility across environments"
-            )
+            recommendations.append("Verify configuration compatibility across environments")
 
         # Add specific file recommendations
-        high_impact_files = [
-            f
-            for f in impacted_files
-            if f.severity in [ImpactSeverity.HIGH, ImpactSeverity.CRITICAL]
-        ]
+        high_impact_files = [f for f in impacted_files if f.severity in [ImpactSeverity.HIGH, ImpactSeverity.CRITICAL]]
         if high_impact_files:
-            recommendations.append(
-                f"Pay special attention to {len(high_impact_files)} high-impact files"
-            )
+            recommendations.append(f"Pay special attention to {len(high_impact_files)} high-impact files")
 
         return recommendations

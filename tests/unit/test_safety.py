@@ -27,34 +27,22 @@ def test_safety_checker():
     safe_file = temp_dir / "utils.py"
     safe_file.write_text("def helper(): return True")
     result = checker.check_file_safety(str(safe_file))
-    print(
-        f"✅ Safe file: risk={result.risk_level.value} ({result.risk_level.name}), safe={result.safe_to_modify}"
-    )
-    assert result.risk_level.value == 0, (
-        f"Expected risk 0, got {result.risk_level.value}"
-    )
+    print(f"✅ Safe file: risk={result.risk_level.value} ({result.risk_level.name}), safe={result.safe_to_modify}")
+    assert result.risk_level.value == 0, f"Expected risk 0, got {result.risk_level.value}"
 
     # Test 2: Critical file (flake.nix)
     critical_file = temp_dir / "flake.nix"
     critical_file.write_text('{ description = "test flake"; }')
     result = checker.check_file_safety(str(critical_file))
-    print(
-        f"🛑 Critical file: risk={result.risk_level.value} ({result.risk_level.name}), safe={result.safe_to_modify}"
-    )
-    assert result.risk_level.value == 3, (
-        f"Expected risk 3, got {result.risk_level.value}"
-    )
+    print(f"🛑 Critical file: risk={result.risk_level.value} ({result.risk_level.name}), safe={result.safe_to_modify}")
+    assert result.risk_level.value == 3, f"Expected risk 3, got {result.risk_level.value}"
 
     # Test 3: High risk file (configuration.nix)
     high_file = temp_dir / "configuration.nix"
     high_file.write_text("{ boot.loader.systemd-boot.enable = true; }")
     result = checker.check_file_safety(str(high_file))
-    print(
-        f"🚨 High risk file: risk={result.risk_level.value} ({result.risk_level.name}), safe={result.safe_to_modify}"
-    )
-    assert result.risk_level.value == 2, (
-        f"Expected risk 2, got {result.risk_level.value}"
-    )
+    print(f"🚨 High risk file: risk={result.risk_level.value} ({result.risk_level.name}), safe={result.safe_to_modify}")
+    assert result.risk_level.value == 2, f"Expected risk 2, got {result.risk_level.value}"
 
     # Test 4: Medium risk file (.nix extension)
     medium_file = temp_dir / "module.nix"
@@ -63,18 +51,14 @@ def test_safety_checker():
     print(
         f"⚠️  Medium risk file: risk={result.risk_level.value} ({result.risk_level.name}), safe={result.safe_to_modify}"
     )
-    assert result.risk_level.value == 1, (
-        f"Expected risk 1, got {result.risk_level.value}"
-    )
+    assert result.risk_level.value == 1, f"Expected risk 1, got {result.risk_level.value}"
 
     # Test 5: Non-existent file
     result = checker.check_file_safety("nonexistent.txt")
     print(
         f"❌ Non-existent file: risk={result.risk_level.value} ({result.risk_level.name}), safe={result.safe_to_modify}"
     )
-    assert result.risk_level.value == 3, (
-        f"Expected risk 3, got {result.risk_level.value}"
-    )
+    assert result.risk_level.value == 3, f"Expected risk 3, got {result.risk_level.value}"
 
     # Test AI format
     ai_result = result.to_ai_format()

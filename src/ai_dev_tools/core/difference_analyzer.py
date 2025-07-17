@@ -166,9 +166,7 @@ class DifferenceAnalyzer:
 
         # Calculate summary statistics
         total_differences = len(differences)
-        significant_differences = len(
-            [d for d in differences if d.significance != ChangeSignificance.TRIVIAL]
-        )
+        significant_differences = len([d for d in differences if d.significance != ChangeSignificance.TRIVIAL])
 
         summary = self._generate_summary(differences)
 
@@ -216,9 +214,7 @@ class DifferenceAnalyzer:
         for rel_path in sorted(all_rel_paths):
             if rel_path in rel_files1 and rel_path in rel_files2:
                 # File exists in both directories - compare content
-                diff = self._compare_file_content(
-                    rel_files1[rel_path], rel_files2[rel_path]
-                )
+                diff = self._compare_file_content(rel_files1[rel_path], rel_files2[rel_path])
                 if diff:
                     diff.path = str(rel_path)
                     differences.append(diff)
@@ -248,9 +244,7 @@ class DifferenceAnalyzer:
 
         # Calculate summary statistics
         total_differences = len(differences)
-        significant_differences = len(
-            [d for d in differences if d.significance != ChangeSignificance.TRIVIAL]
-        )
+        significant_differences = len([d for d in differences if d.significance != ChangeSignificance.TRIVIAL])
 
         summary = self._generate_summary(differences)
 
@@ -291,9 +285,7 @@ class DifferenceAnalyzer:
 
         return files
 
-    def _compare_file_content(
-        self, file1: Path, file2: Path
-    ) -> Optional[FileDifference]:
+    def _compare_file_content(self, file1: Path, file2: Path) -> Optional[FileDifference]:
         """Compare content of two files"""
         try:
             # Check if files are identical by hash first (fast check)
@@ -388,9 +380,7 @@ class DifferenceAnalyzer:
         """Filter out comment lines"""
         filtered = []
         for line in lines:
-            is_comment = any(
-                re.match(pattern, line) for pattern in self.TRIVIAL_PATTERNS
-            )
+            is_comment = any(re.match(pattern, line) for pattern in self.TRIVIAL_PATTERNS)
             if not is_comment:
                 filtered.append(line)
         return filtered
@@ -400,9 +390,7 @@ class DifferenceAnalyzer:
     ) -> ChangeSignificance:
         """Determine the significance of changes"""
         total_lines = max(len(lines1), len(lines2))
-        changed_lines = len(
-            [line for line in diff_lines if line.startswith(("+", "-"))]
-        )
+        changed_lines = len([line for line in diff_lines if line.startswith(("+", "-"))])
 
         if total_lines == 0:
             return ChangeSignificance.TRIVIAL
@@ -421,9 +409,7 @@ class DifferenceAnalyzer:
 
         # Check for trivial changes only
         trivial_only = all(
-            any(
-                re.match(pattern, line[1:].strip()) for pattern in self.TRIVIAL_PATTERNS
-            )
+            any(re.match(pattern, line[1:].strip()) for pattern in self.TRIVIAL_PATTERNS)
             for line in diff_lines
             if line.startswith(("+", "-"))
         )
@@ -458,15 +444,11 @@ class DifferenceAnalyzer:
         summary_parts = [f"{total} differences found"]
 
         if by_type:
-            type_summary = ", ".join(
-                f"{count} {dtype}" for dtype, count in by_type.items()
-            )
+            type_summary = ", ".join(f"{count} {dtype}" for dtype, count in by_type.items())
             summary_parts.append(f"Types: {type_summary}")
 
         if by_significance:
-            sig_summary = ", ".join(
-                f"{count} {sig}" for sig, count in by_significance.items()
-            )
+            sig_summary = ", ".join(f"{count} {sig}" for sig, count in by_significance.items())
             summary_parts.append(f"Significance: {sig_summary}")
 
         return "; ".join(summary_parts)

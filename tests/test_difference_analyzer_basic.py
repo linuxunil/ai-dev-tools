@@ -2,13 +2,15 @@
 Basic tests for DifferenceAnalyzer - Core functionality validation
 """
 
-import pytest
 import tempfile
 from pathlib import Path
+
+import pytest
+
 from ai_dev_tools.core.difference_analyzer import (
+    ChangeSignificance,
     DifferenceAnalyzer,
     DifferenceType,
-    ChangeSignificance,
 )
 
 
@@ -21,9 +23,7 @@ class TestDifferenceAnalyzer:
         assert analyzer.ignore_whitespace is True
         assert analyzer.ignore_comments is False
 
-        analyzer_custom = DifferenceAnalyzer(
-            ignore_whitespace=False, ignore_comments=True
-        )
+        analyzer_custom = DifferenceAnalyzer(ignore_whitespace=False, ignore_comments=True)
         assert analyzer_custom.ignore_whitespace is False
         assert analyzer_custom.ignore_comments is True
 
@@ -62,9 +62,7 @@ class TestDifferenceAnalyzer:
             file2 = temp_path / "file2.txt"
 
             file1.write_text("Hello, world!\nThis is a test file.\n")
-            file2.write_text(
-                "Hello, universe!\nThis is a test file.\nWith an extra line.\n"
-            )
+            file2.write_text("Hello, universe!\nThis is a test file.\nWith an extra line.\n")
 
             analysis = analyzer.compare_files(file1, file2)
 
@@ -92,9 +90,7 @@ class TestDifferenceAnalyzer:
             file2 = temp_path / "file2.txt"
 
             file1.write_text("Hello, world!\nThis is a test.\n")
-            file2.write_text(
-                "Hello, world!   \n  This is a test.  \n"
-            )  # Extra whitespace
+            file2.write_text("Hello, world!   \n  This is a test.  \n")  # Extra whitespace
 
             # With whitespace ignored, should be identical
             analysis_ignore = analyzer_ignore.compare_files(file1, file2)
@@ -174,7 +170,7 @@ class TestDifferenceAnalyzer:
 
     def test_mixed_file_directory_error(self):
         """Test error handling when comparing file to directory"""
-        analyzer = DifferenceAnalyzer()
+        DifferenceAnalyzer()
 
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_path = Path(temp_dir)
@@ -229,18 +225,14 @@ class TestDifferenceAnalyzer:
 
         for filename in text_files:
             path = Path(filename)
-            assert analyzer._is_text_file(path), (
-                f"{filename} should be detected as text file"
-            )
+            assert analyzer._is_text_file(path), f"{filename} should be detected as text file"
 
         # Test non-text files
         binary_files = ["test.bin", "test.exe", "test.jpg", "test.pdf"]
 
         for filename in binary_files:
             path = Path(filename)
-            assert not analyzer._is_text_file(path), (
-                f"{filename} should not be detected as text file"
-            )
+            assert not analyzer._is_text_file(path), f"{filename} should not be detected as text file"
 
     def test_summary_generation(self):
         """Test difference summary generation"""

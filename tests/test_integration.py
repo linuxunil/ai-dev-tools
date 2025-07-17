@@ -5,11 +5,9 @@ Tests that verify tools work together effectively in real-world scenarios.
 """
 
 import subprocess
-import pytest
 import tempfile
-from pathlib import Path
-import json
 import time
+from pathlib import Path
 
 
 class TestToolIntegration:
@@ -35,10 +33,10 @@ class TestToolIntegration:
     ./modules/development.nix
     ./modules/desktop.nix
   ];
-  
+
   boot.loader.systemd-boot.enable = true;
   networking.hostName = "nixos-machine";
-  
+
   users.users.user = {
     isNormalUser = true;
     extraGroups = [ "wheel" "docker" ];
@@ -71,7 +69,7 @@ class TestToolIntegration:
     pkgs.vim
     pkgs.nodejs
   ];
-  
+
   programs.docker.enable = true;
   virtualisation.docker.enable = true;
 }
@@ -86,7 +84,7 @@ class TestToolIntegration:
     pkgs.vscode
     pkgs.discord
   ];
-  
+
   services.xserver.enable = true;
   services.xserver.displayManager.gdm.enable = true;
 }
@@ -100,7 +98,7 @@ class TestToolIntegration:
     pkgs.spotify
     pkgs.telegram-desktop
   ];
-  
+
   programs.git = {
     enable = true;
     userName = "User";
@@ -113,12 +111,12 @@ class TestToolIntegration:
         (self.repo_path / "flake.nix").write_text("""
 {
   description = "NixOS configuration";
-  
+
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     home-manager.url = "github:nix-community/home-manager";
   };
-  
+
   outputs = { self, nixpkgs, home-manager }: {
     nixosConfigurations.nixos-machine = nixpkgs.lib.nixosSystem {
       system = "x86_64-linux";
@@ -141,9 +139,7 @@ def validate_config():
     return True
 """)
 
-    def run_tool(
-        self, tool: str, *args, format_type: str = "silent"
-    ) -> tuple[int, str]:
+    def run_tool(self, tool: str, *args, format_type: str = "silent") -> tuple[int, str]:
         """Run a tool and return exit code and output"""
         cmd = [tool] + list(args) + ["--format", format_type]
         result = subprocess.run(cmd, capture_output=True, text=True, cwd=self.repo_path)
@@ -153,9 +149,7 @@ def validate_config():
         """Test complete AI workflow: assess → find → fix → validate"""
 
         # Step 1: AI assesses repository health
-        repo_status, _ = self.run_tool(
-            "ai-repo-status", "--repo-path", str(self.repo_path)
-        )
+        repo_status, _ = self.run_tool("ai-repo-status", "--repo-path", str(self.repo_path))
 
         # Repository should be clean (0 syntax errors)
         assert repo_status == 0
@@ -175,21 +169,15 @@ def validate_config():
         safety_results = {}
 
         # Check development.nix (medium risk - system config)
-        dev_risk, _ = self.run_tool(
-            "ai-safety-check", f"{self.repo_path}/modules/development.nix"
-        )
+        dev_risk, _ = self.run_tool("ai-safety-check", f"{self.repo_path}/modules/development.nix")
         safety_results["development.nix"] = dev_risk
 
         # Check desktop.nix (medium risk - system config)
-        desktop_risk, _ = self.run_tool(
-            "ai-safety-check", f"{self.repo_path}/modules/desktop.nix"
-        )
+        desktop_risk, _ = self.run_tool("ai-safety-check", f"{self.repo_path}/modules/desktop.nix")
         safety_results["desktop.nix"] = desktop_risk
 
         # Check home.nix (medium risk - user config)
-        home_risk, _ = self.run_tool(
-            "ai-safety-check", f"{self.repo_path}/modules/home.nix"
-        )
+        home_risk, _ = self.run_tool("ai-safety-check", f"{self.repo_path}/modules/home.nix")
         safety_results["home.nix"] = home_risk
 
         # All module files should be medium risk (exit code 1)
@@ -200,9 +188,7 @@ def validate_config():
         assert len(files_to_modify) == 3
 
         # Step 5: AI validates repository is still clean after changes
-        final_status, _ = self.run_tool(
-            "ai-repo-status", "--repo-path", str(self.repo_path)
-        )
+        final_status, _ = self.run_tool("ai-repo-status", "--repo-path", str(self.repo_path))
         assert final_status == 0
 
     def test_safety_hierarchy_validation(self):
@@ -222,12 +208,8 @@ def validate_config():
         ]
 
         for file_path, expected_risk in files_and_expected_risks:
-            actual_risk, _ = self.run_tool(
-                "ai-safety-check", f"{self.repo_path}/{file_path}"
-            )
-            assert actual_risk == expected_risk, (
-                f"File {file_path} should have risk {expected_risk}, got {actual_risk}"
-            )
+            actual_risk, _ = self.run_tool("ai-safety-check", f"{self.repo_path}/{file_path}")
+            assert actual_risk == expected_risk, f"File {file_path} should have risk {expected_risk}, got {actual_risk}"
 
     def test_pattern_detection_accuracy(self):
         """Test that pattern detection finds correct similar patterns"""
@@ -258,9 +240,7 @@ def validate_config():
         """Test that tools provide consistent information"""
 
         # Run multiple tools on same repository
-        repo_status, _ = self.run_tool(
-            "ai-repo-status", "--repo-path", str(self.repo_path)
-        )
+        repo_status, _ = self.run_tool("ai-repo-status", "--repo-path", str(self.repo_path))
 
         # If repo is clean, safety checks should work properly
         if repo_status == 0:
@@ -272,9 +252,7 @@ def validate_config():
             assert 0 <= safety_risk <= 3
 
             # Pattern scanner should work
-            pattern_count, _ = self.run_tool(
-                "ai-pattern-scan", f"{test_file}:4", "--search-dir", str(self.repo_path)
-            )
+            pattern_count, _ = self.run_tool("ai-pattern-scan", f"{test_file}:4", "--search-dir", str(self.repo_path))
 
             # Should return valid count (0-254) or error (255)
             assert (0 <= pattern_count <= 254) or pattern_count == 255
@@ -330,9 +308,7 @@ def validate_config():
 
         # Test safety checking performance
         start_time = time.time()
-        safety_risk, _ = self.run_tool(
-            "ai-safety-check", f"{self.repo_path}/modules/module_0.nix"
-        )
+        safety_risk, _ = self.run_tool("ai-safety-check", f"{self.repo_path}/modules/module_0.nix")
         safety_time = time.time() - start_time
 
         # Should complete quickly

@@ -2,15 +2,14 @@
 Basic tests for ProjectValidator functionality
 """
 
-import pytest
-import tempfile
 import json
+import tempfile
 from pathlib import Path
 
 from ai_dev_tools.core.validator import (
     ProjectValidator,
-    ValidationLevel,
     ValidationIssue,
+    ValidationLevel,
     ValidationResult,
 )
 
@@ -35,9 +34,7 @@ dependencies = ["requests>=2.0.0"]
             (project_path / "src").mkdir()
             (project_path / "src" / "main.py").write_text("print('Hello World')")
             (project_path / "tests").mkdir()
-            (project_path / "tests" / "test_main.py").write_text(
-                "def test_main(): pass"
-            )
+            (project_path / "tests" / "test_main.py").write_text("def test_main(): pass")
 
             validator = ProjectValidator(project_path)
             result = validator.validate_project()
@@ -52,14 +49,10 @@ dependencies = ["requests>=2.0.0"]
             project_path = Path(temp_dir)
 
             # Create Python file with syntax error
-            (project_path / "bad_syntax.py").write_text(
-                "def broken_function(\n    print('missing closing paren')"
-            )
+            (project_path / "bad_syntax.py").write_text("def broken_function(\n    print('missing closing paren')")
 
             validator = ProjectValidator(project_path)
-            result = validator.validate_project(
-                check_structure=False, check_dependencies=False, check_security=False
-            )
+            result = validator.validate_project(check_structure=False, check_dependencies=False, check_security=False)
 
             assert not result.is_valid
             assert len(result.issues) >= 1
@@ -74,14 +67,10 @@ dependencies = ["requests>=2.0.0"]
             project_path = Path(temp_dir)
 
             # Create JSON file with syntax error
-            (project_path / "bad.json").write_text(
-                '{"key": "value",}'
-            )  # Trailing comma
+            (project_path / "bad.json").write_text('{"key": "value",}')  # Trailing comma
 
             validator = ProjectValidator(project_path)
-            result = validator.validate_project(
-                check_structure=False, check_dependencies=False, check_security=False
-            )
+            result = validator.validate_project(check_structure=False, check_dependencies=False, check_security=False)
 
             assert not result.is_valid
             syntax_issues = [i for i in result.issues if i.category == "syntax"]
@@ -97,16 +86,12 @@ dependencies = ["requests>=2.0.0"]
             (project_path / "main.py").write_text("print('Hello')")
 
             validator = ProjectValidator(project_path)
-            result = validator.validate_project(
-                check_syntax=False, check_dependencies=False, check_security=False
-            )
+            result = validator.validate_project(check_syntax=False, check_dependencies=False, check_security=False)
 
             structure_issues = [i for i in result.issues if i.category == "structure"]
             assert len(structure_issues) >= 2  # Missing README.md and .gitignore
 
-            readme_issue = next(
-                (i for i in structure_issues if "README.md" in i.message), None
-            )
+            readme_issue = next((i for i in structure_issues if "README.md" in i.message), None)
             assert readme_issue is not None
             assert readme_issue.level == ValidationLevel.WARNING
 
@@ -125,14 +110,10 @@ version = "1.0.0"
             (project_path / "utils.py").write_text("def helper(): pass")
 
             validator = ProjectValidator(project_path)
-            result = validator.validate_project(
-                check_syntax=False, check_dependencies=False, check_security=False
-            )
+            result = validator.validate_project(check_syntax=False, check_dependencies=False, check_security=False)
 
             structure_issues = [i for i in result.issues if i.category == "structure"]
-            root_files_issue = next(
-                (i for i in structure_issues if "root" in i.message), None
-            )
+            root_files_issue = next((i for i in structure_issues if "root" in i.message), None)
             assert root_files_issue is not None
             assert root_files_issue.level == ValidationLevel.WARNING
 
@@ -149,9 +130,7 @@ DATABASE_TOKEN = "token_abc123"
 """)
 
             validator = ProjectValidator(project_path)
-            result = validator.validate_project(
-                check_syntax=False, check_structure=False, check_dependencies=False
-            )
+            result = validator.validate_project(check_syntax=False, check_structure=False, check_dependencies=False)
 
             security_issues = [i for i in result.issues if i.category == "security"]
             assert len(security_issues) >= 2  # API key and password
@@ -177,14 +156,10 @@ DATABASE_TOKEN = "token_abc123"
 """)
 
             validator = ProjectValidator(project_path)
-            result = validator.validate_project(
-                check_syntax=False, check_dependencies=False, check_security=False
-            )
+            result = validator.validate_project(check_syntax=False, check_dependencies=False, check_security=False)
 
             structure_issues = [i for i in result.issues if i.category == "structure"]
-            main_file_issue = next(
-                (i for i in structure_issues if "app.js" in i.message), None
-            )
+            main_file_issue = next((i for i in structure_issues if "app.js" in i.message), None)
             assert main_file_issue is not None
             assert main_file_issue.level == ValidationLevel.ERROR
 
@@ -200,17 +175,13 @@ dependencies = ["requests"]
 """)
 
             validator = ProjectValidator(project_path)
-            result = validator.validate_project(
-                check_syntax=False, check_structure=False, check_security=False
-            )
+            result = validator.validate_project(check_syntax=False, check_structure=False, check_security=False)
 
             dep_issues = [i for i in result.issues if i.category == "dependencies"]
             assert len(dep_issues) >= 2  # Missing name and version
 
             name_issue = next((i for i in dep_issues if "name" in i.message), None)
-            version_issue = next(
-                (i for i in dep_issues if "version" in i.message), None
-            )
+            version_issue = next((i for i in dep_issues if "version" in i.message), None)
             assert name_issue is not None
             assert version_issue is not None
 
@@ -261,12 +232,10 @@ dependencies = ["requests"]
         """Test exit code calculation based on issue levels"""
         with tempfile.TemporaryDirectory() as temp_dir:
             project_path = Path(temp_dir)
-            validator = ProjectValidator(project_path)
+            ProjectValidator(project_path)
 
             # Test no issues
-            result = ValidationResult(
-                is_valid=True, issues=[], summary="No issues", total_files_checked=0
-            )
+            result = ValidationResult(is_valid=True, issues=[], summary="No issues", total_files_checked=0)
             assert result.get_exit_code() == 0
 
             # Test warning only

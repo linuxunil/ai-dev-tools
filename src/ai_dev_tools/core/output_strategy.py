@@ -120,24 +120,18 @@ class OutputFormatter:
     }
 
     @classmethod
-    def get_strategy(
-        cls, format_type: OutputFormat = OutputFormat.SILENT
-    ) -> OutputStrategy:
+    def get_strategy(cls, format_type: OutputFormat = OutputFormat.SILENT) -> OutputStrategy:
         """Get output strategy (defaults to silent for maximum efficiency)"""
         return cls._strategies[format_type]
 
     @classmethod
-    def format_output(
-        cls, data: Dict[str, Any], format_type: OutputFormat = OutputFormat.SILENT
-    ) -> str:
+    def format_output(cls, data: Dict[str, Any], format_type: OutputFormat = OutputFormat.SILENT) -> str:
         """Format output using specified strategy (defaults to silent)"""
         strategy = cls.get_strategy(format_type)
         return strategy.format_result(data)
 
     @classmethod
-    def format_error(
-        cls, error: str, code: int = 1, format_type: OutputFormat = OutputFormat.SILENT
-    ) -> str:
+    def format_error(cls, error: str, code: int = 1, format_type: OutputFormat = OutputFormat.SILENT) -> str:
         """Format error using specified strategy (defaults to silent)"""
         strategy = cls.get_strategy(format_type)
         return strategy.format_error(error, code)
@@ -179,9 +173,7 @@ def create_ai_optimized_result(
 
     if metadata:
         # Only include non-default metadata
-        filtered_meta = {
-            k: v for k, v in metadata.items() if v is not None and v != "" and v != []
-        }
+        filtered_meta = {k: v for k, v in metadata.items() if v is not None and v != "" and v != []}
         if filtered_meta:
             result["meta"] = filtered_meta
 

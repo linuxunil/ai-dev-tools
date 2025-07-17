@@ -10,23 +10,21 @@ Tests AI development tools with standardized Ollama models using:
 """
 
 import sys
-import time
 from pathlib import Path
 
 # Add src to path for imports
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from ai_dev_tools.core.ollama_client import (
-    OllamaClient,
-    ModelSize,
-    PromptType,
-    get_ollama_client,
-    quick_ai_decision,
-)
 from ai_dev_tools.core.metrics_collector import (
     WorkflowType,
     get_metrics_collector,
     measure_workflow,
+)
+from ai_dev_tools.core.ollama_client import (
+    ModelSize,
+    PromptType,
+    get_ollama_client,
+    quick_ai_decision,
 )
 
 
@@ -43,7 +41,7 @@ def test_pattern_detection():
         print(f"❌ Test file not found: {test_file}")
         return
 
-    with open(test_file, "r") as f:
+    with open(test_file) as f:
         code_content = f.read()
 
     # Use metrics collection
@@ -79,7 +77,7 @@ def test_safety_assessment():
         print(f"❌ Test file not found: {test_file}")
         return
 
-    with open(test_file, "r") as f:
+    with open(test_file) as f:
         code_content = f.read()
 
     with measure_workflow(WorkflowType.SAFETY_CHECK) as ctx:
@@ -137,7 +135,7 @@ def test_context_analysis():
         print(f"❌ Test file not found: {test_file}")
         return
 
-    with open(test_file, "r") as f:
+    with open(test_file) as f:
         code_content = f.read()
 
     with measure_workflow(WorkflowType.CONTEXT_ANALYSIS) as ctx:
@@ -198,9 +196,7 @@ def show_metrics_summary():
     print(f"Success rate: {summary['success_rate']:.1f}%")
     print(f"Average execution time: {summary['execution_time']['avg']:.2f}s")
     print(f"Average tokens per workflow: {summary['tokens']['total_avg']:.0f}")
-    print(
-        f"Token efficiency: {summary['efficiency']['tokens_per_second']:.0f} tokens/sec"
-    )
+    print(f"Token efficiency: {summary['efficiency']['tokens_per_second']:.0f} tokens/sec")
 
     # Export metrics
     export_path = collector.export_metrics()

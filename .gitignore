@@ -101,3 +101,6 @@ logs/
 tmp/
 temp/
 .tmp/
+
+# Benchmark Results
+results/
