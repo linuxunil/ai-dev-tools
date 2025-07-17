@@ -20,13 +20,14 @@ import argparse
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
+import async_benchmark
 from async_benchmark import (
     get_benchmark_profile, 
     run_comprehensive_benchmark_async,
     create_benchmark_tasks,
-    calculate_improvement_stats,
-    wait_for_instances
+    calculate_improvement_stats
 )
+from ai_dev_tools.core.container_orchestrator import ContainerOrchestrator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -37,6 +38,7 @@ class BatchConfiguration:
         self.name = name
         self.profile = profile
         self.sample_size = sample_size
+        self.repetitions = repetitions
         self.description = description
 
 class BatchRunner:
@@ -44,6 +46,7 @@ class BatchRunner:
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.batch_results = []
+        self.orchestrator = ContainerOrchestrator(str(Path(__file__).parent.parent / "docker-compose.yml"))
         
     def get_predefined_batches(self) -> Dict[str, List[BatchConfiguration]]:
         """Get predefined batch configurations"""
@@ -90,21 +93,25 @@ class BatchRunner:
         all_run_results = []
         
         try:
+            # Start containers for the selected profile
+            logger.info(f"Starting Ollama containers for {config.profile} profile...")
+            self.orchestrator.up(profile=config.profile, build=False) # Build is handled by run_benchmark.sh or manual build
+
             # Get instances for this profile
             instances = get_benchmark_profile(config.profile)
             
-            # Wait for instances to be ready
-            ready_instances = await wait_for_instances(instances, max_wait=180)
+            # Wait for instances to be ready using the orchestrator's method
+            ready_instances = await self.orchestrator.wait_for_instances(instances, max_wait=180)
             
             if not ready_instances:
-                logger.error(f"❌ No instances ready for {config.name}")
+                logger.error(f"❌ No Ollama instances are ready for {config.name} after timeout!")
                 return {
                     "config": config.__dict__,
                     "success": False,
                     "error": "No instances ready",
                     "duration": time.time() - start_time
                 }
-            
+
             # Create tasks once
             tasks = create_benchmark_tasks()
             
@@ -153,7 +160,10 @@ class BatchRunner:
                 "error": str(e),
                 "duration": time.time() - start_time
             }
-    
+        finally:
+            logger.info(f"Stopping Ollama containers for {config.profile} profile...")
+            self.orchestrator.down(profile=config.profile)
+
     async def run_batch_sequential(self, configs: List[BatchConfiguration]) -> List[Dict[str, Any]]:
         """Run batch configurations sequentially"""
         
@@ -204,7 +214,7 @@ class BatchRunner:
         return processed_results
     
     def save_batch_results(self, batch_name: str, results: List[Dict[str, Any]], 
-                          execution_mode: str) -> str:
+                           execution_mode: str) -> str:
         """Save batch results to file"""
         
         timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')

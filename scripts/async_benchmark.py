@@ -22,6 +22,7 @@ import toml
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 from ai_dev_tools.core.metrics_collector import measure_workflow, WorkflowType
+from ai_dev_tools.core.container_orchestrator import ContainerOrchestrator
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -112,67 +113,12 @@ async def make_ollama_request_async(session: aiohttp.ClientSession,
             "url": url
         }
 
-async def check_instance_health(session: aiohttp.ClientSession, 
-                               instance: ModelInstance) -> bool:
-    """Check if an Ollama instance is ready"""
-    
-    try:
-        async with session.get(f"{instance.url}/api/version", 
-                              timeout=aiohttp.ClientTimeout(total=5)) as response:
-            if response.status == 200:
-                # Check if model is loaded
-                async with session.get(f"{instance.url}/api/tags",
-                                     timeout=aiohttp.ClientTimeout(total=5)) as tags_response:
-                    if tags_response.status == 200:
-                        tags_data = await tags_response.json()
-                        models = [m["name"] for m in tags_data.get("models", [])]
-                        instance.ready = instance.model in models
-                        return instance.ready
-            return False
-    except Exception as e:
-        logger.debug(f"Health check failed for {instance.name}: {e}")
-        return False
-
-async def wait_for_instances(instances: List[ModelInstance], max_wait: int = 300) -> List[ModelInstance]:
-    """Wait for all instances to be ready"""
-    
-    logger.info(f"Waiting for {len(instances)} Ollama instances to be ready...")
-    
-    async with aiohttp.ClientSession() as session:
-        start_time = time.time()
-        ready_instances = []
-        
-        while time.time() - start_time < max_wait:
-            # Check health of all instances
-            health_tasks = [check_instance_health(session, inst) for inst in instances]
-            await asyncio.gather(*health_tasks, return_exceptions=True)
-            
-            # Check if all instances are ready
-            all_currently_ready = all(inst.ready for inst in instances)
-            if all_currently_ready:
-                logger.info(f"All {len(instances)} instances are ready: {[inst.name for inst in instances]}")
-                return instances
-            
-            # Log which instances are ready/not ready
-            ready_names = [inst.name for inst in instances if inst.ready]
-            not_ready_names = [inst.name for inst in instances if not inst.ready]
-            if ready_names:
-                logger.info(f"Ready: {ready_names}")
-            if not_ready_names:
-                logger.info(f"Not ready: {not_ready_names}")
-            
-            await asyncio.sleep(10) # Wait before next check
-        
-        logger.warning(f"Not all Ollama instances are ready after {max_wait}s.")
-        return [inst for inst in instances if inst.ready] # Return whatever is ready
-
 async def run_task_samples_async(session: aiohttp.ClientSession,
-                                instance: ModelInstance,
-                                task: BenchmarkTask,
-                                approach: str,
-                                prompt: str,
-                                sample_size: int) -> List[Dict[str, Any]]:
-    """Run multiple samples of a task on one instance"""
+                                 instance: ModelInstance,
+                                 task: BenchmarkTask,
+                                 approach: str,
+                                 prompt: str,
+                                 sample_size: int) -> List[Dict[str, Any]]:    """Run multiple samples of a task on one instance"""
     
     logger.info(f"Running {task.name} {approach} on {instance.name} ({sample_size} samples)")
     
@@ -371,6 +317,9 @@ async def main():
                        type=int,
                        default=None,
                        help="Sample size per approach (auto-scaled by profile if not specified)")
+    parser.add_argument("--no-build",
+                       action="store_true",
+                       help="Skip building Docker images")
     
     args = parser.parse_args()
     
@@ -382,65 +331,80 @@ async def main():
     print(f"📊 Profile: {args.profile.upper()} ({['Laptop', 'Desktop', 'Server'][['light', 'medium', 'heavy'].index(args.profile)]})")
     print("=" * 70)
     
-    # Get model instances for profile
-    instances = get_benchmark_profile(args.profile)
+    orchestrator = ContainerOrchestrator(str(Path(__file__).parent.parent / "docker-compose.yml"))
     
-    # Wait for instances to be ready
-    ready_instances = await wait_for_instances(instances, max_wait=300)
-    
-    if not ready_instances:
-        logger.error("No Ollama instances are ready!")
-        logger.info("Run: docker compose up -d to start the containers")
-        return
-    
-    logger.info(f"Using {len(ready_instances)} ready instances: {[i.name for i in ready_instances]}")
-    
-    # Create tasks
-    tasks = create_benchmark_tasks()
-    
-    # Run benchmark with profile-specific sample size
-    results = await run_comprehensive_benchmark_async(ready_instances, tasks, sample_size)
-    
-    # Add profile info to results
-    results["benchmark_info"]["profile"] = args.profile
-    results["benchmark_info"]["hardware_target"] = ["Laptop", "Desktop", "Server"][["light", "medium", "heavy"].index(args.profile)]
-    
-    # Calculate improvements
-    improvements = calculate_improvement_stats(results)
-    
-    # Display results
-    print(f"\n📊 CONCURRENT BENCHMARK RESULTS")
-    print("=" * 50)
-    
-    for model, stats in improvements.items():
-        print(f"\n{model.upper()} Model:")
-        print(f"  Token reduction: {stats['token_reduction_percent']:.1f}%")
-        print(f"  Time reduction: {stats['time_reduction_percent']:.1f}%")
-        print(f"  Sample size: {stats['sample_size']}")
-    
-    # Overall summary
-    if improvements:
-        avg_token = statistics.mean([s["token_reduction_percent"] for s in improvements.values()])
-        avg_time = statistics.mean([s["time_reduction_percent"] for s in improvements.values()])
+    try:
+        # Build images if not skipped
+        if not args.no_build:
+            orchestrator.build_images()
         
-        print(f"\n🎯 OVERALL IMPROVEMENTS:")
-        print(f"   Average token reduction: {avg_token:.1f}%")
-        print(f"   Average time reduction: {avg_time:.1f}%")
-        print(f"   Total duration: {results['benchmark_info']['total_duration_seconds']:.1f}s")
-        print(f"   Concurrent instances: {len(ready_instances)}")
-    
-    # Save results
-    output_dir = Path("benchmark_results")
-    output_dir.mkdir(parents=True, exist_ok=True)
-    output_file = output_dir / f"benchmark_{args.profile}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
-    with open(output_file, 'w') as f:
-        json.dump(results, f, indent=2)
-    
-    print(f"\n💾 Results saved to: {output_file}")
-    total_samples = len(ready_instances) * len(tasks) * 2 * sample_size
-    print(f"📏 Total concurrent samples: {total_samples}")
-    print(f"🖥️  Hardware profile: {args.profile} ({results['benchmark_info']['hardware_target']})")
-    print(f"🔢 Sample size per approach: {sample_size}")
+        # Start containers for the selected profile
+        logger.info(f"Starting Ollama containers for {args.profile} profile...")
+        orchestrator.up(profile=args.profile, build=not args.no_build)
+        
+        # Get model instances for profile
+        instances = get_benchmark_profile(args.profile)
+        
+        # Wait for instances to be ready
+        ready_instances = await orchestrator.wait_for_instances(instances, max_wait=300)
+        
+        if not ready_instances:
+            logger.error("No Ollama instances are ready after timeout!")
+            logger.info("Ensure Ollama containers are running and models are pulled.")
+            return
+            
+            logger.info(f"Using {len(ready_instances)} ready instances: {[i.name for i in ready_instances]}")
+            
+            # Create tasks
+            tasks = create_benchmark_tasks()
+            
+            # Run benchmark with profile-specific sample size
+            results = await run_comprehensive_benchmark_async(ready_instances, tasks, sample_size)
+            
+            # Add profile info to results
+            results["benchmark_info"]["profile"] = args.profile
+            results["benchmark_info"]["hardware_target"] = ["Laptop", "Desktop", "Server"][["light", "medium", "heavy"].index(args.profile)]
+            
+            # Calculate improvements
+            improvements = calculate_improvement_stats(results)
+            
+            # Display results
+            print(f"\n📊 CONCURRENT BENCHMARK RESULTS")
+            print("=" * 50)
+            
+            for model, stats in improvements.items():
+                print(f"\n{model.upper()} Model:")
+                print(f"  Token reduction: {stats['token_reduction_percent']:.1f}%")
+                print(f"  Time reduction: {stats['time_reduction_percent']:.1f}%")
+                print(f"  Sample size: {stats['sample_size']}")
+            
+            # Overall summary
+            if improvements:
+                avg_token = statistics.mean([s["token_reduction_percent"] for s in improvements.values()])
+                avg_time = statistics.mean([s["time_reduction_percent"] for s in improvements.values()])
+                
+                print(f"\n🎯 OVERALL IMPROVEMENTS:")
+                print(f"   Average token reduction: {avg_token:.1f}%")
+                print(f"   Average time reduction: {avg_time:.1f}%")
+                print(f"   Total duration: {results['benchmark_info']['total_duration_seconds']:.1f}s")
+                print(f"   Concurrent instances: {len(ready_instances)}")
+            
+            # Save results
+            output_dir = Path("benchmark_results")
+            output_dir.mkdir(parents=True, exist_ok=True)
+            output_file = output_dir / f"benchmark_{args.profile}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.json"
+            with open(output_file, 'w') as f:
+                json.dump(results, f, indent=2)
+            
+            print(f"\n💾 Results saved to: {output_file}")
+            total_samples = len(ready_instances) * len(tasks) * 2 * sample_size
+            print(f"📏 Total concurrent samples: {total_samples}")
+            print(f"🖥️  Hardware profile: {args.profile} ({results['benchmark_info']['hardware_target']})")
+            print(f"🔢 Sample size per approach: {sample_size}")
+
+    finally:
+        logger.info("Stopping Ollama containers...")
+        orchestrator.down(profile=args.profile)
 
 if __name__ == "__main__":
     asyncio.run(main())
